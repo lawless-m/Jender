@@ -42,9 +42,7 @@ end
 function shoot(c::Camera, s::Real, t::Real)
 		rd = c.lens_radius * rand_in_unit_disk()
 		offset = c.u * rd.x + c.v * rd.y
-		o = c.origin + offset
-		d = c.lower_left + s * c.horizontal + t * c.vertical - c.origin - offset
-		Ray(o, d)
+		Ray(c.origin + offset, c.lower_left + s * c.horizontal + t * c.vertical - c.origin - offset)
 end
 
 

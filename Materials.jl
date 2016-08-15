@@ -54,7 +54,7 @@ end
 
 function scatter(m::Metal, ray::Ray, hit)
 	reflection = reflect(unitVector(ray.direction), hit.normal)
-	scatter = Ray(hit.p, reflection + m.fuzz ) * random_in_unit_sphere()
+	scatter = Ray(hit.p, reflection + m.fuzz * random_in_unit_sphere())
 	dot(scatter.direction, hit.normal) > 0, scatter, m.albedo
 end
 

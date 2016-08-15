@@ -26,6 +26,10 @@ function Base.(:(-))(v::Vec3)
 	Vec3(-v.x, -v.y, -v.z)
 end
 
+function Base.(:(sqrt))(v::Vec3)
+	Vec3(sqrt(v.x), sqrt(v.y), sqrt(v.z))
+end
+
 function Base.(:(/))(v::Vec3, f::Real)
 	Vec3(v.x/f, v.y/f, v.z/f)
 end

@@ -24,7 +24,8 @@ type Camera
 	
 	
 	function Camera(lookfrom::Vec3, lookat::Vec3, vup::Vec3, vfov::Real, aspect::Real, aperture::Real, focus_dist::Real)
-		half_h = tan((vfov * pi / 180)/2)
+		theta = vfov * pi / 180
+		half_h = tan(theta/2)
 		half_w = aspect * half_h
 		w = unitVector(lookfrom - lookat)
 		u = unitVector(cross(vup, w))

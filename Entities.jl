@@ -16,8 +16,8 @@ abstract Entity
 function hitEntity(world, ray::Ray, t_min::Real, t_max::Real)
 	last_hit = Hit(Inf, Vec3(), Vec3(), Null())
 	
-	for e in world
-		h = hitEntity(e, ray, t_min, t_max)
+	for entity in world
+		h = hitEntity(entity, ray, t_min, t_max)
 		if h != nothing
 			last_hit = h
 			t_max = h.t
@@ -37,11 +37,11 @@ immutable Sphere <: Entity
 	Sphere(xyz, r, m) = new(xyz, r, m)
 end
 
-function hitEntity(s::Sphere, r::Ray, t_min::Real, t_max::Real)
-	oc = r.origin - s.center
-	b = dot(oc, r.direction)
+function hitEntity(s::Sphere, ray::Ray, t_min::Real, t_max::Real)
+	oc = ray.origin - s.center
+	b = dot(oc, ray.direction)
 	c = dot(oc, oc) - s.radius^2
-	discriminant = b^2 - r.dot * c
+	discriminant = b^2 - ray.dot * c
 	if discriminant <= 0
 		return nothing
 	end
@@ -49,13 +49,13 @@ function hitEntity(s::Sphere, r::Ray, t_min::Real, t_max::Real)
 	# potential optimisation:  "if t >= tmax return nothing"
 	t = (-b - sqrt(discriminant)) / r.dot
 	if t < t_max && t > t_min
-		p = pointAt(r, t)
+		p = pointAt(ray, t)
 		return Hit(t, p, (p - s.center) / s.radius, s.material)
 	end
 	
 	t = (-b + sqrt(discriminant)) / r.dot
 	if t < t_max && t > t_min
-		p = pointAt(r, t)
+		p = pointAt(ray, t)
 		return Hit(t, p, (p - s.center) / s.radius, s.material)
 	end
 	

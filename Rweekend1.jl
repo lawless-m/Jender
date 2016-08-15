@@ -55,11 +55,11 @@ ns = 10
 pgm = open("rweek1.pgm", "w")
 write(pgm, "P3\n$(nx) $(ny) 255\n")
 
-world = [Sphere(0, 0, -1, 0.5, Lambertian(0.1, 0.2, 0.5))]
-push!(world, Sphere(0, -100.5, 1, 100, Lambertian(0.8, 0.8, 0.8)))
+world = [Sphere(0,0,-1, 0.5, Lambertian(0.1, 0.2, 0.5))]
+push!(world, Sphere(0,-100.5,-1, 100, Lambertian(0.8, 0.8, 0.8)))
 push!(world, Sphere(1,0,-1, 0.5, Metal(0.8, 0.6, 0.2, 0.0)))
-push!(world, Sphere(-1,0,-1,0.5,Dielectric(1.5)))
-push!(world, Sphere(-1,0,-1,0.45, Dielectric(1.5)))
+push!(world, Sphere(-1,0,-1, 0.5, Dielectric(1.5)))
+push!(world, Sphere(-1,0,-1, -0.45, Dielectric(1.5)))
 
 println("Build world")
 push_random_world!(world)
@@ -78,7 +78,7 @@ for j in (ny-1):-1:0
 			col += color(r, world, 0)
 		end
 		col /= ns
-		col = Vec3(sqrt(col.x), sqrt(col.y), sqrt(col.z))
+		col = sqrt(col)
 	
 		write(pgm, "$(floor(Int,255.99col.x)) $(floor(Int,255.99col.y)) $(floor(Int,255.99col.z))\n")
 	end

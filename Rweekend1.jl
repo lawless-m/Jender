@@ -1,3 +1,5 @@
+push!(LOAD_PATH, ".")
+
 using Vecs: Vec3, unitVector
 using Entities: Entity, Sphere, hitEntity
 using Materials: Lambertian, Metal, Dielectric
@@ -18,7 +20,6 @@ function color(r::Ray, world, depth::Int)
 		end
 	end
 	
-	println("Depth $(depth)")
 	return Vec3(0, 0, 0)
 end
 

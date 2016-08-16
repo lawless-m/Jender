@@ -1,9 +1,9 @@
 module Vecs
 
 immutable Vec3
-	x::Real
-	y::Real
-	z::Real
+	x::Float64
+	y::Float64
+	z::Float64
 	Vec3() = new(0.0, 0.0, 0.0)
 	Vec3(x, y, z) = new(x, y, z)
 	Vec3(v::Vector{Real}) = new(v[1], v[2], v[3])

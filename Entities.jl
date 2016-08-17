@@ -24,7 +24,7 @@ function hitEntity(world, ray::Ray, t_min::Real, t_max::Real)
 		end
 	end
 	if last_hit.t < Inf
-		last_hit
+		return last_hit
 	end
 	nothing
 end

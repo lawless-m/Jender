@@ -24,8 +24,6 @@ function color(r::Ray, world, depth::Int)
 end
 
 function push_random_world!(world)
-	push!(world, Sphere(0,-1000,0, 1000, Lambertian(0.5, 0.5, 0.5)))
-
 	for a in -11:10
 		for b in -11:10
 			choose_mat = rand()
@@ -41,10 +39,6 @@ function push_random_world!(world)
 			end
 		end
 	end
-	push!(world, Sphere(0, 1, 0, 1.0, Dielectric(1.5)));
-    push!(world, Sphere(-4, 1, 0, 1.0, Lambertian(0.4, 0.2, 0.1)));
-    push!(world, Sphere(4, 1, 0, 1.0, Metal(0.7, 0.6, 0.5, 0.0)));
-
 end
 
 
@@ -55,13 +49,12 @@ ns = 10
 pgm = open("rweek1.pgm", "w")
 write(pgm, "P3\n$(nx) $(ny) 255\n")
 
-world = [Sphere(0,0,-1, 0.5, Lambertian(0.1, 0.2, 0.5))]
-push!(world, Sphere(0,-100.5,-1, 100, Lambertian(0.8, 0.8, 0.8)))
-push!(world, Sphere(1,0,-1, 0.5, Metal(0.8, 0.6, 0.2, 0.0)))
-push!(world, Sphere(-1,0,-1, 0.5, Dielectric(1.5)))
-push!(world, Sphere(-1,0,-1, -0.45, Dielectric(1.5)))
-
-println("Build world")
+world = [
+			Sphere(0,-1000,0, 1000, Lambertian(0.5, 0.5, 0.5))
+			, Sphere(0, 1, 0, 1.0, Dielectric(1.5))
+			, Sphere(-4, 1, 0, 1.0, Lambertian(0.4, 0.2, 0.1))
+			, Sphere(4, 1, 0, 1.0, Metal(0.7, 0.6, 0.5, 0.0))
+		]
 push_random_world!(world)
 
 camera = Camera(Vec3(13,2,3), Vec3(0,0,0), Vec3(0,1,0), 20, nx/ny, 0.1, 10)

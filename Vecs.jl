@@ -42,6 +42,10 @@ function Base.(:(*))(f::Real, v::Vec3)
 	Vec3(v.x*f, v.y*f, v.z*f)
 end
 
+function Base.(:(*))(a::Vec3, b::Vec3)
+	Vec3(a.x*b.x, a.y*b.y, a.z*b.z)
+end
+
 function Base.(:(+))(a::Vec3, b::Vec3)
 	Vec3(a.x+b.x, a.y+b.y, a.z+b.z)
 end

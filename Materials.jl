@@ -1,6 +1,6 @@
 module Materials
-
-using Vecs: Vec3, unitVector, Vec3rand
+rand() = 0.25
+using Vecs: Vec3, unitVector, Vec3rand, squaredLength
 
 using Rays: Ray
 
@@ -24,7 +24,7 @@ end
 
 function random_in_unit_sphere()
 	p = 2*Vec3rand() - Vec3(1,1,1)
-	while squared_length(p) >= 1.0
+	while squaredLength(p) >= 1.0
 		p = 2*Vec3rand() - Vec3(1,1,1)
 	end
 	p
@@ -71,7 +71,15 @@ function scatter(m::Dielectric, ray::Ray, hit)
 	if dot(ray.direction, hit.normal) > 0
 		outward_normal = -hit.normal
 		ni_over_nt = m.ref_idx
-		cosine = sqrt(1 - m.ref_idx^2 * (1 - (dot(ray.direction, hit.normal) / length(ray.direction))^2))
+		cosine = dot(ray.direction, hit.normal) / length(ray.direction)
+		cosine = 1 - m.ref_idx^2 * (1 - cosine^2)
+		if cosine > 0
+			cosine = sqrt(cosine)		
+		else
+			println(hit.normal)
+			error("Cosine $cosine")
+		end
+		
 	else
 		outward_normal = hit.normal
 		ni_over_nt = 1.0 / m.ref_idx

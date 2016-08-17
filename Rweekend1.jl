@@ -1,5 +1,11 @@
-push!(LOAD_PATH, ".")
+#=
+C++ version hosted at http://goo.gl/9yItEO http://goo.gl/sBih70
 
+=#
+
+
+push!(LOAD_PATH, ".")
+rand() = 0.25
 using Vecs: Vec3, unitVector
 using Entities: Entity, Sphere, hitEntity
 using Materials: Lambertian, Metal, Dielectric
@@ -13,6 +19,7 @@ function color(r::Ray, world, depth::Int)
 		t = 0.5(unit_direction.y + 1)
 		return (1-t) * Vec3(1.0, 1.0, 1.0) + t * Vec3(0.5, 0.7, 1.0)
 	end
+	
 	if depth < 50
 		onscreen, scattered, attenuation = Materials.scatter(h.material, r, h)
 		if onscreen
@@ -24,8 +31,6 @@ function color(r::Ray, world, depth::Int)
 end
 
 function push_random_world!(world)
-	push!(world, Sphere(0,-1000,0, 1000, Lambertian(0.5, 0.5, 0.5)))
-
 	for a in -11:10
 		for b in -11:10
 			choose_mat = rand()
@@ -41,10 +46,6 @@ function push_random_world!(world)
 			end
 		end
 	end
-	push!(world, Sphere(0, 1, 0, 1.0, Dielectric(1.5)));
-    push!(world, Sphere(-4, 1, 0, 1.0, Lambertian(0.4, 0.2, 0.1)));
-    push!(world, Sphere(4, 1, 0, 1.0, Metal(0.7, 0.6, 0.5, 0.0)));
-
 end
 
 
@@ -52,14 +53,14 @@ nx = 1200
 ny = 800
 ns = 10
 
-pgm = open("rweek1.pgm", "w")
+pgm = open("r_0.25.pgm", "w")
 write(pgm, "P3\n$(nx) $(ny) 255\n")
-
-world = [Sphere(0,0,-1, 0.5, Lambertian(0.1, 0.2, 0.5))]
-push!(world, Sphere(0,-100.5,-1, 100, Lambertian(0.8, 0.8, 0.8)))
-push!(world, Sphere(1,0,-1, 0.5, Metal(0.8, 0.6, 0.2, 0.0)))
-push!(world, Sphere(-1,0,-1, 0.5, Dielectric(1.5)))
-push!(world, Sphere(-1,0,-1, -0.45, Dielectric(1.5)))
+world = [
+			Sphere(0,-1000,0, 1000, Lambertian(0.5, 0.5, 0.5)))
+			, Sphere(0, 1, 0, 1.0, Dielectric(1.5)))
+			, Sphere(-4, 1, 0, 1.0, Lambertian(0.4, 0.2, 0.1)))
+			, Sphere(4, 1, 0, 1.0, Metal(0.7, 0.6, 0.5, 0.0)))
+		]
 
 println("Build world")
 push_random_world!(world)
@@ -67,7 +68,6 @@ push_random_world!(world)
 camera = Camera(Vec3(13,2,3), Vec3(0,0,0), Vec3(0,1,0), 20, nx/ny, 0.1, 10)
 
 for j in (ny-1):-1:0
-	println("Render row $(j)")
 	for i in 0:(nx-1)
 		col = Vec3(0,0,0)
 		for s in 0:ns-1 
@@ -79,7 +79,7 @@ for j in (ny-1):-1:0
 		end
 		col /= ns
 		col = sqrt(col)
-	
+			
 		write(pgm, "$(floor(Int,255.99col.x)) $(floor(Int,255.99col.y)) $(floor(Int,255.99col.z))\n")
 	end
 end

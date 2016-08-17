@@ -1,9 +1,9 @@
 module Vecs
 
 immutable Vec3
-	x::Real
-	y::Real
-	z::Real
+	x::Float32
+	y::Float32
+	z::Float32
 	Vec3() = new(0.0, 0.0, 0.0)
 	Vec3(x, y, z) = new(x, y, z)
 	Vec3(v::Vector{Real}) = new(v[1], v[2], v[3])
@@ -15,7 +15,11 @@ function Vec3rand()
 end
 
 function Base.(:(length))(v::Vec3)
-	sqrt(squaredLength(v))
+	try
+		sqrt(squaredLength(v))
+	catch e
+		error("length")
+	end
 end
 
 function tripleProduct(a::Vec3, b::Vec3, c::Vec3)
@@ -40,6 +44,10 @@ end
 
 function Base.(:(*))(f::Real, v::Vec3)
 	Vec3(v.x*f, v.y*f, v.z*f)
+end
+
+function Base.(:(*))(a::Vec3, b::Vec3)
+	Vec3(a.x*b.x, a.y*b.y, a.z*b.z)
 end
 
 function Base.(:(+))(a::Vec3, b::Vec3)

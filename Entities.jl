@@ -26,7 +26,6 @@ function hitEntity(world, ray::Ray, t_min::Real, t_max::Real)
 	if last_hit.t < Inf
 		return last_hit
 	end
-	nothing
 end
 
 immutable Sphere <: Entity

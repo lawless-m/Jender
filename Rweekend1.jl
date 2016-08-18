@@ -11,7 +11,7 @@ using Materials: Lambertian, Metal, Dielectric
 using Rays: Ray, pointAt
 using Cameras: Camera, shoot
 
-function color(i, j, r::Ray, world::Vector{Entity}, depth::Int)
+function color(r::Ray, world::Vector{Entity}, depth::Int)
 	h = hitEntity(world, r, 0.001, Inf)
 	if h == nothing
 		unit_direction = unitVector(r.direction)
@@ -20,7 +20,7 @@ function color(i, j, r::Ray, world::Vector{Entity}, depth::Int)
 	end
 	
 	if depth < 50
-		onscreen, scattered, attenuation = Materials.scatter(h.material, r, h, i, j)
+		onscreen, scattered, attenuation = Materials.scatter(h.material, r, h)
 		if onscreen
 			return attenuation * color(i, j, scattered, world, depth+1)
 		end
@@ -75,7 +75,7 @@ for j in (ny-1):-1:0
 			v = (j + rand()) / ny
 			r = shoot(camera, u, v)
 			p = pointAt(r, 2.0)
-			col += color(i, j, r, world, 0)
+			col += color(r, world, 0)
 		end
 		col /= ns
 		col = sqrt(col)

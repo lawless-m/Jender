@@ -41,7 +41,7 @@ immutable Lambertian <: Material
 end
 
 
-function scatter(m::Lambertian, ray::Ray, hit, i=0, j=0)
+function scatter(m::Lambertian, ray::Ray, hit)
 	target = hit.p + hit.normal + random_in_unit_sphere()
 	true, Ray(hit.p, target - hit.p), m.albedo
 end
@@ -52,7 +52,7 @@ immutable Metal <: Material
 	Metal(r, g, b, f) = new(Vec3(r, g, b), f)
 end
 
-function scatter(m::Metal, ray::Ray, hit, i=0, j=0)
+function scatter(m::Metal, ray::Ray, hit)
 	reflection = reflect(unitVector(ray.direction), hit.normal)
 	scatter = Ray(hit.p, reflection + m.fuzz * random_in_unit_sphere())
 	dot(scatter.direction, hit.normal) > 0, scatter, m.albedo
@@ -62,7 +62,7 @@ immutable Dielectric <: Material
 	ref_idx::Real
 end
 
-function scatter(m::Dielectric, ray::Ray, hit, i=0, j=0)
+function scatter(m::Dielectric, ray::Ray, hit)
 	outward_normal = Vec3(0,0,0)
 	ni_over_nt = 0.0
 	cosine = 0.0

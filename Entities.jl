@@ -1,5 +1,5 @@
 module Entities
-rand() = 0.25
+
 using Vecs: Vec3
 using Materials: Material, Null
 using Rays: Ray, pointAt
@@ -13,7 +13,7 @@ end
 
 abstract Entity
 
-function hitEntity(world, ray::Ray, t_min::Real, t_max::Real)
+function hitEntity(world::Vector{Entity}, ray::Ray, t_min::Real, t_max::Real)
 	last_hit = Hit(Inf, Vec3(), Vec3(), Null())
 	
 	for entity in world

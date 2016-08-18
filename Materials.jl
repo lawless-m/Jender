@@ -1,5 +1,5 @@
 module Materials
-rand() = 0.25
+
 using Vecs: Vec3, unitVector, Vec3rand, squaredLength
 
 using Rays: Ray
@@ -41,7 +41,7 @@ immutable Lambertian <: Material
 end
 
 
-function scatter(m::Lambertian, ray::Ray, hit)
+function scatter(m::Lambertian, ray::Ray, hit, i=0, j=0)
 	target = hit.p + hit.normal + random_in_unit_sphere()
 	true, Ray(hit.p, target - hit.p), m.albedo
 end
@@ -52,7 +52,7 @@ immutable Metal <: Material
 	Metal(r, g, b, f) = new(Vec3(r, g, b), f)
 end
 
-function scatter(m::Metal, ray::Ray, hit)
+function scatter(m::Metal, ray::Ray, hit, i=0, j=0)
 	reflection = reflect(unitVector(ray.direction), hit.normal)
 	scatter = Ray(hit.p, reflection + m.fuzz * random_in_unit_sphere())
 	dot(scatter.direction, hit.normal) > 0, scatter, m.albedo
@@ -62,8 +62,8 @@ immutable Dielectric <: Material
 	ref_idx::Real
 end
 
-function scatter(m::Dielectric, ray::Ray, hit)
-	outward_normal = Vec3()
+function scatter(m::Dielectric, ray::Ray, hit, i=0, j=0)
+	outward_normal = Vec3(0,0,0)
 	ni_over_nt = 0.0
 	cosine = 0.0
 	reflection = reflect(ray.direction, hit.normal)
@@ -71,14 +71,8 @@ function scatter(m::Dielectric, ray::Ray, hit)
 	if dot(ray.direction, hit.normal) > 0
 		outward_normal = -hit.normal
 		ni_over_nt = m.ref_idx
-		cosine = dot(ray.direction, hit.normal) / length(ray.direction)
-		cosine = 1 - m.ref_idx^2 * (1 - cosine^2)
-		if cosine > 0
-			cosine = sqrt(cosine)		
-		else
-			println(hit.normal)
-			error("Cosine $cosine")
-		end
+		# the abs wasn't in the original code. I suspect a hidden bug
+		cosine = sqrt(abs((1 - m.ref_idx^2 * (1 - (dot(ray.direction, hit.normal) / length(ray.direction))^2))))	
 		
 	else
 		outward_normal = hit.normal

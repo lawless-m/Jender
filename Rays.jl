@@ -1,5 +1,5 @@
 module Rays
-rand() = 0.25
+
 using Vecs: Vec3
 
 immutable Ray

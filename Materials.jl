@@ -1,6 +1,6 @@
 module Materials
 
-using Vecs: Vec3, unitVector, Vec3rand
+using Vecs: Vec3, unitVector, Vec3rand, squaredLength
 
 using Rays: Ray
 
@@ -24,7 +24,7 @@ end
 
 function random_in_unit_sphere()
 	p = 2*Vec3rand() - Vec3(1,1,1)
-	while squared_length(p) >= 1.0
+	while squaredLength(p) >= 1.0
 		p = 2*Vec3rand() - Vec3(1,1,1)
 	end
 	p
@@ -63,7 +63,7 @@ immutable Dielectric <: Material
 end
 
 function scatter(m::Dielectric, ray::Ray, hit)
-	outward_normal = Vec3()
+	outward_normal = Vec3(0,0,0)
 	ni_over_nt = 0.0
 	cosine = 0.0
 	reflection = reflect(ray.direction, hit.normal)
@@ -71,7 +71,9 @@ function scatter(m::Dielectric, ray::Ray, hit)
 	if dot(ray.direction, hit.normal) > 0
 		outward_normal = -hit.normal
 		ni_over_nt = m.ref_idx
-		cosine = sqrt(1 - m.ref_idx^2 * (1 - (dot(ray.direction, hit.normal) / length(ray.direction))^2))
+		# the abs wasn't in the original code. I suspect a hidden bug
+		cosine = sqrt(abs((1 - m.ref_idx^2 * (1 - (dot(ray.direction, hit.normal) / length(ray.direction))^2))))	
+		
 	else
 		outward_normal = hit.normal
 		ni_over_nt = 1.0 / m.ref_idx

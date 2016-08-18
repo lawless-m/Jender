@@ -21,10 +21,10 @@ type Camera
 	u::Vec3
 	v::Vec3
 	w::Vec3
-	lens_radius::Real
+	lens_radius::Float64
 	
 	
-	function Camera(lookfrom::Vec3, lookat::Vec3, vup::Vec3, vfov::Real, aspect::Real, aperture::Real, focus_dist::Real)
+	function Camera(lookfrom::Vec3, lookat::Vec3, vup::Vec3, vfov::Float64, aspect::Float64, aperture::Float64, focus_dist::Float64)
 		theta = vfov * pi / 180
 		half_h = tan(theta/2)
 		half_w = aspect * half_h
@@ -41,7 +41,7 @@ type Camera
 	end
 end
 
-function shoot(c::Camera, s::Real, t::Real)
+function shoot(c::Camera, s::Float64, t::Float64)
 		rd = c.lens_radius * rand_in_unit_disk()
 		offset = c.u * rd.x + c.v * rd.y
 		Ray(c.origin + offset, c.lower_left + s * c.horizontal + t * c.vertical - c.origin - offset)

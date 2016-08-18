@@ -34,7 +34,7 @@ function push_random_world!(world::Vector{Entity})
 		for b in -11:10
 			choose_mat = rand()
 			center = Vec3(a + 0.9rand(), 0.2, b + 0.9rand())
-			if length(center - Vec3(4, 0.2, 0)) > 0.9
+			if length(center - Vec3(4.0, 0.2, 0.0)) > 0.9
 				if choose_mat < 0.8
 					push!(world, Sphere(center, 0.2, Lambertian(rand()*rand(), rand()*rand(), rand()*rand())))
 				elseif choose_mat < 0.95
@@ -63,7 +63,7 @@ world = Entity[
 println("Build world")
 push_random_world!(world)
 
-camera = Camera(Vec3(13,2,3), Vec3(0,0,0), Vec3(0,1,0), 20, nx/ny, 0.1, 10)
+camera = Camera(Vec3(13,2,3), Vec3(0,0,0), Vec3(0,1,0), 20.0, nx/ny, 0.1, 10.0)
 
 for j in (ny-1):-1:0
 	println("Row $j")

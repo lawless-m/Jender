@@ -5,7 +5,7 @@ using Materials: Material, Null
 using Rays: Ray, pointAt
 
 immutable Hit
-	t::Real
+	t::Float64
 	p::Vec3
 	normal::Vec3
 	material::Material
@@ -13,7 +13,7 @@ end
 
 abstract Entity
 
-function hitEntity(world::Vector{Entity}, ray::Ray, t_min::Real, t_max::Real)
+function hitEntity(world::Vector{Entity}, ray::Ray, t_min::Float64, t_max::Float64)
 	last_hit = Hit(Inf, Vec3(), Vec3(), Null())
 	
 	for entity in world
@@ -30,13 +30,13 @@ end
 
 immutable Sphere <: Entity
 	center::Vec3
-	radius::Real
+	radius::Float64
 	material::Material
 	Sphere(x, y, z, r, m) = new(Vec3(x, y, z), r, m)
 	Sphere(xyz, r, m) = new(xyz, r, m)
 end
 
-function hitEntity(s::Sphere, ray::Ray, t_min::Real, t_max::Real)
+function hitEntity(s::Sphere, ray::Ray, t_min::Float64, t_max::Float64)
 	oc = ray.origin - s.center
 	b = dot(oc, ray.direction)
 	c = dot(oc, oc) - s.radius^2

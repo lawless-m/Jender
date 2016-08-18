@@ -4,12 +4,12 @@ using Vecs: Vec3, unitVector, Vec3rand, squaredLength
 
 using Rays: Ray
 
-function schlick(cosine::Real, ref_idx::Real)
+function schlick(cosine::Float64, ref_idx::Float64)
 	r0 = ((1 - ref_idx) / (1 + ref_idx))^2
 	r0 + (1-r0) * (1-cosine)^5
 end
 
-function refract(v::Vec3, n::Vec3, ni_over_nt::Real)
+function refract(v::Vec3, n::Vec3, ni_over_nt::Float64)
 	uv = unitVector(v)
 	dt = dot(uv, n)
 	discriminant = 1.0 - ni_over_nt^2 * (1-dt^2)
@@ -48,7 +48,7 @@ end
 
 immutable Metal <: Material
 	albedo::Vec3
-	fuzz::Real
+	fuzz::Float64
 	Metal(r, g, b, f) = new(Vec3(r, g, b), f)
 end
 
@@ -59,11 +59,11 @@ function scatter(m::Metal, ray::Ray, hit)
 end
 
 immutable Dielectric <: Material
-	ref_idx::Real
+	ref_idx::Float64
 end
 
 function scatter(m::Dielectric, ray::Ray, hit)
-	outward_normal = Vec3(0,0,0)
+	outward_normal = Vec3()
 	ni_over_nt = 0.0
 	cosine = 0.0
 	reflection = reflect(ray.direction, hit.normal)

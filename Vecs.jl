@@ -7,7 +7,7 @@ immutable Vec3
 	z::Float64
 	Vec3() = new(0.0, 0.0, 0.0)
 	Vec3(x, y, z) = new(x, y, z)
-	Vec3(v::Vector{Float64}) = new(v[1], v[2], v[3])
+	Vec3(v::Vector) = new(v[1], v[2], v[3])
 	Vec3(v::Vec3) = new(v.x, v.y, v.z)
 end
 
@@ -31,15 +31,27 @@ function Base.(:(sqrt))(v::Vec3)
 	Vec3(sqrt(v.x), sqrt(v.y), sqrt(v.z))
 end
 
-function Base.(:(/))(v::Vec3, f::Real)
+function Base.(:(/))(v::Vec3, f::Float64)
 	Vec3(v.x/f, v.y/f, v.z/f)
 end
 
-function Base.(:(*))(v::Vec3, f::Real)
+function Base.(:(/))(v::Vec3, f::Int)
+	Vec3(v.x/f, v.y/f, v.z/f)
+end
+
+function Base.(:(*))(v::Vec3, f::Float64)
 	Vec3(v.x*f, v.y*f, v.z*f)
 end
 
-function Base.(:(*))(f::Real, v::Vec3)
+function Base.(:(*))(v::Vec3, f::Int)
+	Vec3(v.x*f, v.y*f, v.z*f)
+end
+
+function Base.(:(*))(f::Float64, v::Vec3)
+	Vec3(v.x*f, v.y*f, v.z*f)
+end
+
+function Base.(:(*))(f::Int, v::Vec3)
 	Vec3(v.x*f, v.y*f, v.z*f)
 end
 

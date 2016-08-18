@@ -13,5 +13,5 @@ Run Rweekend1.jl to produce Rweekend1.pgm
 
 This code is currently a naive translation, it needs some optimizing.
 
-<img src="https://i.sli.mg/jdRzFH.png" width="1200" height="800">
+<img src="https://i.sli.mg/jdRzFH.png" width="800" height="600">
 

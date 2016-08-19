@@ -94,7 +94,7 @@ function writepgm(cols::Matrix, filename)
 	close(pgm)
 end
 
-function profiled()
+function profiled(cols)
 	pixel(world, 50, 50)
 	@profile render(cols)
 	Profile.print()

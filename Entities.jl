@@ -4,7 +4,7 @@ using Vecs: Vec3
 using Materials: Material, Null
 using Rays: Ray, pointAt
 
-immutable Hit
+type Hit
 	t::Float64
 	p::Vec3
 	normal::Vec3
@@ -13,17 +13,12 @@ end
 
 abstract Entity
 
-function hitEntity(world::Vector{Entity}, ray::Ray, t_min::Float64, t_max::Float64)
-	last_hit = Hit(Inf, Vec3(), Vec3(), Null())
-	
+function hitWorld(world::Vector{Entity}, ray::Ray, t_min::Float64, t_max::Float64)
+	last_hit = Hit(t_max, Vec3(), Vec3(), Null())
 	for entity in world
-		h = hitEntity(entity, ray, t_min, t_max)
-		if h != nothing
-			last_hit = h
-			t_max = h.t
-		end
+		hitEntity!(last_hit, entity, ray, t_min)
 	end
-	if last_hit.t < Inf
+	if last_hit.t < t_max
 		return last_hit
 	end
 end
@@ -31,35 +26,41 @@ end
 immutable Sphere <: Entity
 	center::Vec3
 	radius::Float64
+	radius2::Float64
 	material::Material
-	Sphere(x, y, z, r, m) = new(Vec3(x, y, z), r, m)
-	Sphere(xyz, r, m) = new(xyz, r, m)
+	Sphere(x, y, z, r, m) = new(Vec3(x, y, z), r, r^2, m)
+	Sphere(xyz, r, m) = new(xyz, r, r^2, m)
 end
 
-function hitEntity(s::Sphere, ray::Ray, t_min::Float64, t_max::Float64)
-	oc = ray.origin - s.center
+function hitEntity!(last_hit::Hit, s::Sphere, ray::Ray, t_min::Float64)
+	oc = Vec3(ray.origin.x - s.center.x, ray.origin.y - s.center.y, ray.origin.z - s.center.z) #oc = ray.origin - s.center
 	b = dot(oc, ray.direction)
-	c = dot(oc, oc) - s.radius^2
+	c = dot(oc, oc) - s.radius2
 	discriminant = b^2 - ray.dot * c
 
 	if discriminant <= 0
-		return nothing
+		return
 	end
 
 	# potential optimisation:  "if t >= tmax return nothing"
 	
 	t = (-b - sqrt(discriminant)) / ray.dot
-	if t < t_max && t > t_min
-		p = pointAt(ray, t)
-		return Hit(t, p, (p - s.center) / s.radius, s.material)
+	if t < last_hit.t && t > t_min
+		last_hit.t = t
+		last_hit.p = pointAt(ray, t)
+		last_hit.normal = (last_hit.p - s.center) / s.radius
+		last_hit.material = s.material
+		return
 	end
 	
 	t = (-b + sqrt(discriminant)) / ray.dot
-	if t < t_max && t > t_min
-		p = pointAt(ray, t)
-		return Hit(t, p, (p - s.center) / s.radius, s.material)
+	if t < last_hit.t && t > t_min
+		last_hit.t = t
+		last_hit.p = pointAt(ray, t)
+		last_hit.normal = (last_hit.p - s.center) / s.radius
+		last_hit.material = s.material
+		return
 	end
-	
 end
 
 end

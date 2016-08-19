@@ -6,27 +6,27 @@ C++ version hosted at http://goo.gl/9yItEO http://goo.gl/sBih70
 unshift!(LOAD_PATH, ".")
 
 using Vecs: Vec3, unitVector
-using Entities: Entity, Sphere, hitEntity
+using Entities: Entity, Sphere, hitWorld, hitEntity!
 using Materials: Lambertian, Metal, Dielectric
 using Rays: Ray, pointAt
 using Cameras: Camera, shoot
 
 function color(r::Ray, world::Vector{Entity}, depth::Int)
-	h = hitEntity(world, r, 0.001, Inf)
+	h = hitWorld(world, r, 0.001, Inf)
 	if h == nothing
 		unit_direction = unitVector(r.direction)
 		t = 0.5(unit_direction.y + 1)
-		return (1-t) * Vec3(1.0, 1.0, 1.0) + t * Vec3(0.5, 0.7, 1.0)
+		return [(1-t) + 0.5t, (1-t)+0.7t, (1-t)+t]
 	end
 	
 	if depth < 50
 		onscreen, scattered, attenuation = Materials.scatter(h.material, r, h)
 		if onscreen
-			return attenuation * color(scattered, world, depth+1)
+			return attenuation .* color(scattered, world, depth+1)
 		end
 	end
 	
-	return Vec3(0, 0, 0)
+	return [0.0, 0.0, 0.0]
 end
 
 function push_random_world!(world::Vector{Entity})
@@ -47,12 +47,7 @@ function push_random_world!(world::Vector{Entity})
 	end
 end
 
-nx = 1200
-ny = 800
-ns = 10
 
-pgm = open("Rweekend1.pgm", "w")
-write(pgm, "P3\n$(nx) $(ny) 255\n")
 world = Entity[
 			Sphere(0,-1000,0, 1000, Lambertian(0.5, 0.5, 0.5))
 			, Sphere(0, 1, 0, 1.0, Dielectric(1.5))
@@ -63,24 +58,50 @@ world = Entity[
 println("Build world")
 push_random_world!(world)
 
-camera = Camera(Vec3(13,2,3), Vec3(0,0,0), Vec3(0,1,0), 20.0, nx/ny, 0.1, 10.0)
+const WIDTH = 1200
+const HEIGHT = 800
+const SAMPLES = 10
+const CAMERA = Camera(Vec3(13,2,3), Vec3(0,0,0), Vec3(0,1,0), 20.0, WIDTH/HEIGHT, 0.1, 10.0)
 
-for j in (ny-1):-1:0
-	println("Row $j")
-	for i in 0:(nx-1)
-		col = Vec3(0,0,0)
-		for s in 0:ns-1 
-			u = (i + rand()) / nx 
-			v = (j + rand()) / ny
-			r = shoot(camera, u, v)
-			p = pointAt(r, 2.0)
-			col += color(r, world, 0)
+function pixel(world, x::Int, y::Int)
+	r = shoot(CAMERA, (x + rand()) / WIDTH, (y + rand()) / HEIGHT)
+	p = pointAt(r, 2.0)
+	color(r, world, 0)
+end
+
+function render(cols::Matrix)
+	for j in HEIGHT:-1:1 # makes the next line be a countdown rather than up
+		println("Row $j")
+		for i in 1:WIDTH
+			samples = Matrix{Float64}(SAMPLES, 3)
+			#@parallel 
+			for s in 1:SAMPLES	
+				samples[s,1:3] = pixel(world, i-1, j-1)
+			end
+			cols[j,i] =  Vec3(sum(samples[1:SAMPLES]), sum(samples[(1+SAMPLES):2SAMPLES]), sum(samples[1+2SAMPLES:3SAMPLES]))
 		end
-		col /= ns
-		col = sqrt(col)
-			
-		@printf pgm "%s %s %s\n" floor(Int,255.99col.x) floor(Int,255.99col.y) floor(Int,255.99col.z)
 	end
 end
-close(pgm)
+
+function writepgm(cols::Matrix, filename)
+	pgm = open("$filename.pgm", "w")
+	write(pgm, "P3\n$WIDTH $HEIGHT 255\n")
+	for j in HEIGHT:-1:1
+		for i in 1:WIDTH
+			@printf pgm "%d %d %d\n" [floor(Int,255.99sqrt(v/SAMPLES)) for v in [cols[j,i].x cols[j,i].y cols[j,i].z]]...
+		end
+	end
+	close(pgm)
+end
+
+function profiled()
+	pixel(world, 50, 50)
+	@profile render(cols)
+	Profile.print()
+end
+
+cols = Matrix{Vec3}(HEIGHT, WIDTH)
+render(cols)
+writepgm(cols, "Weekend1")
+
 

@@ -36,8 +36,8 @@ immutable Null <: Material
 end
 
 immutable Lambertian <: Material
-	albedo::Vec3
-	Lambertian(r, g, b) = new(Vec3(r, g, b))
+	albedo::Vector{Float64}
+	Lambertian(r, g, b) = new(Float64[r, g, b])
 end
 
 
@@ -47,9 +47,9 @@ function scatter(m::Lambertian, ray::Ray, hit)
 end
 
 immutable Metal <: Material
-	albedo::Vec3
+	albedo::Vector{Float64}
 	fuzz::Float64
-	Metal(r, g, b, f) = new(Vec3(r, g, b), f)
+	Metal(r, g, b, f) = new(Float64[r, g, b], f)
 end
 
 function scatter(m::Metal, ray::Ray, hit)
@@ -82,7 +82,7 @@ function scatter(m::Dielectric, ray::Ray, hit)
 	
 	refraction = refract(ray.direction, outward_normal, ni_over_nt)
 	reflect_prob = refraction == nothing ? 1.0 : schlick(cosine, m.ref_idx)
-	true, Ray(hit.p, rand() < reflect_prob ? reflection : refraction), Vec3(1.0, 1.0, 1.0)
+	true, Ray(hit.p, rand() < reflect_prob ? reflection : refraction), [1.0, 1.0, 1.0]
 end
 
 end

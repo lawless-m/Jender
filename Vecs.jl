@@ -1,6 +1,5 @@
 module Vecs
 
-
 immutable Vec3
 	x::Float64
 	y::Float64
@@ -10,6 +9,28 @@ immutable Vec3
 	Vec3(v::Vector) = new(v[1], v[2], v[3])
 	Vec3(v::Vec3) = new(v.x, v.y, v.z)
 end
+
+
+function Base.(:(*))(v::Vec3, f::Float64)
+	Vec3(v.x*f, v.y*f, v.z*f)
+end
+
+function Base.(:(*))(v::Vec3, f::Int)
+	Vec3(v.x*f, v.y*f, v.z*f)
+end
+
+function Base.(:(*))(f::Float64, v::Vec3)
+	Vec3(v.x*f, v.y*f, v.z*f)
+end
+
+function Base.(:(*))(f::Int, v::Vec3)
+	Vec3(v.x*f, v.y*f, v.z*f)
+end
+
+function Base.(:(*))(a::Vec3, b::Vec3)
+	Vec3(a.x*b.x, a.y*b.y, a.z*b.z)
+end
+
 
 function Vec3rand()
 	Vec3(rand(), rand(), rand())

@@ -103,7 +103,7 @@ else
 		cols = Matrix{Vec3}(2*200, 3*200) # height, width
 		color(shoot(WORLD.cameras[1], 50.5/size(cols)[2], 60.5/size(cols)[1]), 0)
 		@time render(cols, UInt(3))
-		#   7.929312 seconds (1.89 G allocations: 70.498 GB, 6.06% gc time)
+		#   97.929312 seconds (1.89 G allocations: 70.498 GB, 6.06% gc time)
 	end
 	writepgm(cols, "Profiled")
 end

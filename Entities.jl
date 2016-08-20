@@ -3,7 +3,6 @@ module Entities
 using Vecs: Vec3
 using Materials: Material, Null
 using Rays: Ray, pointAt
-using Cameras: Camera
 
 type Hit
 	t::Float64
@@ -14,14 +13,9 @@ end
 
 abstract Entity
 
-immutable World
-	entities::Vector{Entity}
-	cameras::Vector{Camera}
-end
-
-function hitWorld(world::World, ray::Ray, t_min::Float64, t_max::Float64)
+function hitWorld(world::Vector{Entity}, ray::Ray, t_min::Float64, t_max::Float64)
 	last_hit = Hit(t_max, Vec3(), Vec3(), Null())
-	for entity in world.entities
+	for entity in world
 		hitEntity!(last_hit, entity, ray, t_min)
 	end
 	if last_hit.t < t_max

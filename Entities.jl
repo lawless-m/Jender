@@ -10,6 +10,7 @@ type Hit
 	p::Vec3
 	normal::Vec3
 	material::Material
+	Hit(t_max) = new(t_max, Vec3(), Vec3(), Null())
 end
 
 abstract Entity
@@ -20,7 +21,7 @@ immutable World
 end
 
 function hitWorld(world::World, ray::Ray, t_min::Float64, t_max::Float64)
-	last_hit = Hit(t_max, Vec3(), Vec3(), Null())
+	last_hit = Hit(t_max)
 	for entity in world.entities
 		hitEntity!(last_hit, entity, ray, t_min)
 	end
@@ -50,19 +51,19 @@ function hitEntity!(last_hit::Hit, s::Sphere, ray::Ray, t_min::Float64)
 
 	# potential optimisation:  "if t >= tmax return nothing"
 	
-	t = (-b - sqrt(discriminant)) / ray.dot
-	if t < last_hit.t && t > t_min
-		last_hit.t = t
-		last_hit.p = pointAt(ray, t)
+	sd = sqrt(discriminant)
+	
+	tmx = last_hit.t * ray.dot + b
+	tmn = t_min * ray.dot + b
+	
+	if -sd < tmx &&  -sd > tmn
+		last_hit.t = (-b - sd) / ray.dot
+		last_hit.p = pointAt(ray, last_hit.t)
 		last_hit.normal = (last_hit.p - s.center) / s.radius
 		last_hit.material = s.material
-		return
-	end
-	
-	t = (-b + sqrt(discriminant)) / ray.dot
-	if t < last_hit.t && t > t_min
-		last_hit.t = t
-		last_hit.p = pointAt(ray, t)
+	elseif sd < tmx && sd > tmn
+		last_hit.t = (-b + sd) / ray.dot
+		last_hit.p = pointAt(ray, last_hit.t)
 		last_hit.normal = (last_hit.p - s.center) / s.radius
 		last_hit.material = s.material
 		return

@@ -93,7 +93,7 @@ if false
 	render(cols, SAMPLES)
 	writepgm(cols, "Weekend1")
 else
-	if false 
+	if true 
 		cols = Matrix{Vec3}(2*100, 3*100) # height, width
 		color(shoot(WORLD.cameras[1], 50.5/size(cols)[2], 60.5/size(cols)[1]), 0)
 	

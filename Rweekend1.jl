@@ -72,13 +72,13 @@ function render(cols::Matrix{Vec3}, numsamples::Int)
 			for k in 1:numsamples
 				addcolor!(rgb, shoot(WORLD.cameras[1], (i-1 + rand()) / size(cols)[2], (j-1 + rand()) / size(cols)[1]), 0)
 			end
-			cols[j,i] = Vec3(rgb)
+			cols[j,i] = Vec3(rgb / numsamples) 
 		end
 	end
 end
 
-function writepgm(cols::Matrix, filename, scale::Float64)
-	f(v) = floor(Int,255.99*sqrt(v*scale))
+function writepgm(cols::Matrix, filename)
+	f(v) = floor(Int,255.99*sqrt(v))
 	pgm = open("$filename.pgm", "w")
 	write(pgm, "P3\n$(size(cols)[2]) $(size(cols)[1]) 255\n")
 	for j in size(cols)[1]:-1:1
@@ -94,14 +94,14 @@ end
 if true 
 	cols = Matrix{Vec3}(2*400, 3*400) # height, width
 	@time render(cols, SAMPLES)
-	writepgm(cols, "Weekend1", 1/SAMPLES)
+	writepgm(cols, "Weekend1")
 else 
 	srand(0)
 	if false 
 		cols = Matrix{Vec3}(2*100, 3*100) # height, width
 		c = RGB()
 		addcolor!(c, shoot(WORLD.cameras[1], 50.5/size(cols)[2], 60.5/size(cols)[1]), 0)
-		@profile render(cols, 1/3)
+		@profile render(cols, 3)
 		Profile.print()
 	else	
 		cols = Matrix{Vec3}(2*200, 3*200) # height, width
@@ -110,6 +110,6 @@ else
 		@time render(cols, 3)
 		# 90.326774 seconds (1.86 G allocations: 69.478 GB, 8.73% gc time)
 	end
-	writepgm(cols, "Profiled", 1/3)
+	writepgm(cols, "Profiled")
 end
 

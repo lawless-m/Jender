@@ -17,6 +17,7 @@ function Base.(:(/))(v::RGB, f::Real)
 	v.r /= f
 	v.g /= f
 	v.b /= f
+	v
 end
 
 function Base.(:(+))(v::RGB, f::Real)

@@ -43,7 +43,7 @@ end
 
 function scatter(m::Lambertian, ray::Ray, hit)
 	target = hit.p + hit.normal + random_in_unit_sphere()
-	true, Ray(hit.p, target - hit.p), m.albedo
+	true, Ray(hit.p, target - hit.p, ray.time), m.albedo
 end
 
 immutable Metal <: Material
@@ -54,7 +54,7 @@ end
 
 function scatter(m::Metal, ray::Ray, hit)
 	reflection = reflect(unitVector(ray.direction), hit.normal)
-	scatter = Ray(hit.p, reflection + m.fuzz * random_in_unit_sphere())
+	scatter = Ray(hit.p, reflection + m.fuzz * random_in_unit_sphere(), ray.time)
 	dot(scatter.direction, hit.normal) > 0, scatter, m.albedo
 end
 
@@ -82,7 +82,7 @@ function scatter(m::Dielectric, ray::Ray, hit)
 	
 	refraction = refract(ray.direction, outward_normal, ni_over_nt)
 	reflect_prob = refraction == nothing ? 1.0 : schlick(cosine, m.ref_idx)
-	true, Ray(hit.p, rand() < reflect_prob ? reflection : refraction), [1.0, 1.0, 1.0]
+	true, Ray(hit.p, rand() < reflect_prob ? reflection : refraction, ray.time), [1.0, 1.0, 1.0]
 end
 
 end

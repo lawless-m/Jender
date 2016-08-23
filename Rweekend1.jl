@@ -11,22 +11,22 @@ using Materials: Lambertian, Metal, Dielectric
 using Rays: Ray, pointAt
 using Cameras: Camera, shoot
 
-function addcolor!(sample::RGB, r::Ray, depth::Int)
+function color(r::Ray, depth::Int)
 	h = hitWorld(WORLD, r, 0.001, Inf)
 	if h == nothing
-		y = unitVector(r.direction).y
-		sample.r += 0.75 - 0.25y
-		sample.g += 0.85 - 0.15y
-		sample.b += 1.0
-	elseif depth < 50
+		unit_direction = unitVector(r.direction)
+		t = 0.5(unit_direction.y + 1)
+		return [(1-t) + 0.5t, (1-t)+0.7t, (1-t)+t]
+	end
+	
+	if depth < 50
 		onscreen, scattered, attenuation = Materials.scatter(h.material, r, h)
 		if onscreen
-			addcolor!(sample, scattered, depth+1)
-			sample.r *= attenuation[1]
-			sample.g *= attenuation[2]
-			sample.b *= attenuation[3]
+			return attenuation .* color(scattered, depth+1)
 		end
 	end
+	
+	return [0.0, 0.0, 0.0]
 end
 
 function push_random_entities!(entities::Vector{Entity})
@@ -47,32 +47,16 @@ function push_random_entities!(entities::Vector{Entity})
 	end
 end
 
-
-entities = Entity[
-			Sphere(0,-1000,0, 1000, Lambertian(0.5, 0.5, 0.5))
-			, Sphere(0, 1, 0, 1.0, Dielectric(1.5))
-			, Sphere(-4, 1, 0, 1.0, Lambertian(0.4, 0.2, 0.1))
-			, Sphere(4, 1, 0, 1.0, Metal(0.7, 0.6, 0.5, 0.0))
-		]
-
-println("Build world")
-push_random_entities!(entities)
-
-const WIDTH = 1200
-const HEIGHT = 800
-const SAMPLES = 10
-const WORLD = World(entities, [Camera(Vec3(13,2,3), Vec3(0,0,0), Vec3(0,1,0), 20.0, 3/2, 0.1, 10.0)])
-
 function render(cols::Matrix{Vec3}, numsamples::Int)
-	rgb = RGB()
 	for j in size(cols)[1]:-1:1 # makes the next line be a countdown rather than up
 		println("Row $j")
 		for i in 1:size(cols)[2]
-			zero(rgb)
-			for k in 1:numsamples
-				addcolor!(rgb, shoot(WORLD.cameras[1], (i-1 + rand()) / size(cols)[2], (j-1 + rand()) / size(cols)[1]), 0)
+			samples = Matrix{Float64}(numsamples, 3)
+			#@parallel 
+			for s in 1:numsamples
+				samples[s,1:3] = color(shoot(WORLD.cameras[1], (i-1 + rand()) / size(cols)[2], (j-1 + rand()) / size(cols)[1]), 0) / numsamples
 			end
-			cols[j,i] = Vec3(rgb / numsamples) 
+			cols[j,i] =  Vec3(sum(samples[1:numsamples]), sum(samples[(1+numsamples):2numsamples]), sum(samples[1+2numsamples:3numsamples]))
 		end
 	end
 end
@@ -86,30 +70,45 @@ function writepgm(cols::Matrix, filename)
 			write(pgm, "$(f(cols[j,i].x)) $(f(cols[j,i].y)) $(f(cols[j,i].z)) ")
 		end
 		write(pgm, "\n")
-		
 	end
 	close(pgm)
 end
 
-if true 
+entities = Entity[
+			Sphere(0,-1000,0, 1000, Lambertian(0.5, 0.5, 0.5))
+			, Sphere(0, 1, 0, 1.0, Dielectric(1.5))
+			, Sphere(-4, 1, 0, 1.0, Lambertian(0.4, 0.2, 0.1))
+			, Sphere(4, 1, 0, 1.0, Metal(0.7, 0.6, 0.5, 0.0))
+		]
+
+
+const WIDTH = 1200
+const HEIGHT = 800
+const SAMPLES = 10
+const WORLD = World(entities, [Camera(Vec3(13,2,3), Vec3(0,0,0), Vec3(0,1,0), 20.0, 3/2, 0.1, 10.0)])
+
+println("Build world")
+push_random_entities!(entities)
+
+if false 
 	cols = Matrix{Vec3}(2*400, 3*400) # height, width
 	@time render(cols, SAMPLES)
 	writepgm(cols, "Weekend1")
 else 
-	srand(0)
 	if false 
 		cols = Matrix{Vec3}(2*100, 3*100) # height, width
 		c = RGB()
-		addcolor!(c, shoot(WORLD.cameras[1], 50.5/size(cols)[2], 60.5/size(cols)[1]), 0)
+		#addcolor!(c, shoot(WORLD.cameras[1], 50.5/size(cols)[2], 60.5/size(cols)[1]), 0)
 		@profile render(cols, 3)
 		Profile.print()
 	else	
 		cols = Matrix{Vec3}(2*200, 3*200) # height, width
 		c = RGB()
-		@time addcolor!(c, shoot(WORLD.cameras[1], 50.5/size(cols)[2], 60.5/size(cols)[1]), 0)
-		@time render(cols, 3)
+		#@time addcolor!(c, shoot(WORLD.cameras[1], 50.5/size(cols)[2], 60.5/size(cols)[1]), 0)
+		#println(c) #   Vecs.RGB(0.1087251386964388,0.0434686890557862,0.18448252480043215)
+		#quit()
+		@time render(cols, 5)
 		# 90.326774 seconds (1.86 G allocations: 69.478 GB, 8.73% gc time)
 	end
 	writepgm(cols, "Profiled")
 end
-

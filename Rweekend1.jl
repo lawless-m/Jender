@@ -1,32 +1,27 @@
-#=
-C++ version hosted at http://goo.gl/9yItEO http://goo.gl/sBih70
-
-=#
-
 unshift!(LOAD_PATH, ".")
 
-using Vecs: RGB, zero, Vec3, unitVector
+using Vecs: zero, Vec3, unitVector
 using Entities: World, Entity, Sphere, MovingSphere, hitWorld, hitEntity!
 using Materials: Lambertian, Metal, Dielectric
 using Rays: Ray, pointAt
 using Cameras: Camera, shoot
 
-function addcolor!(sample::RGB, r::Ray, depth::Int)
+function color(r::Ray, depth::Int)
 	h = hitWorld(WORLD, r, 0.001, Inf)
 	if h == nothing
-		y = unitVector(r.direction).y
-		sample.r += 0.75 - 0.25y
-		sample.g += 0.85 - 0.15y
-		sample.b += 1.0
-	elseif depth < 50
+		unit_direction = unitVector(r.direction)
+		t = 0.5(unit_direction.y + 1)
+		return [(1-t) + 0.5t, (1-t)+0.7t, (1-t)+t]
+	end
+	
+	if depth < 50
 		onscreen, scattered, attenuation = Materials.scatter(h.material, r, h)
 		if onscreen
-			addcolor!(sample, scattered, depth+1)
-			sample.r *= attenuation[1]
-			sample.g *= attenuation[2]
-			sample.b *= attenuation[3]
+			return attenuation .* color(scattered, depth+1)
 		end
 	end
+	
+	return [0.0, 0.0, 0.0]
 end
 
 function push_random_entities!(entities::Vector{Entity})
@@ -64,15 +59,14 @@ const SAMPLES = 10
 const WORLD = World(entities, [Camera(Vec3(13,2,3), Vec3(0,0,0), Vec3(0,1,0), 20.0, 3/2, 0.1, 10.0, 0.0, 1.0)])
 
 function render(cols::Matrix{Vec3}, numsamples::Int)
-	rgb = RGB()
+	samples = Matrix{Float64}(numsamples, 3)
 	for j in size(cols)[1]:-1:1 # makes the next line be a countdown rather than up
 		println("Row $j")
 		for i in 1:size(cols)[2]
-			zero(rgb)
-			for k in 1:numsamples
-				addcolor!(rgb, shoot(WORLD.cameras[1], (i-1 + rand()) / size(cols)[2], (j-1 + rand()) / size(cols)[1]), 0)
+			for s in 1:numsamples
+				samples[s,1:3] = color(shoot(WORLD.cameras[1], (i-1 + rand()) / size(cols)[2], (j-1 + rand()) / size(cols)[1]), 0)
 			end
-			cols[j,i] = Vec3(rgb) / numsamples
+			cols[j,i] =  Vec3(sum(samples[1:numsamples]) / numsamples, sum(samples[(1+numsamples):2numsamples]) / numsamples, sum(samples[1+2numsamples:3numsamples]) / numsamples)
 		end
 	end
 end
@@ -96,17 +90,15 @@ if true
 	@time render(cols, SAMPLES)
 	writepgm(cols, "Weekend1")
 else 
-	srand(0)
 	if true
 		cols = Matrix{Vec3}(2*100, 3*100) # height, width
-		c = RGB()
-		addcolor!(c, shoot(WORLD.cameras[1], 50.5/size(cols)[2], 60.5/size(cols)[1]), 0)
+		color!(shoot(WORLD.cameras[1], 50.5/size(cols)[2], 60.5/size(cols)[1]), 0)
 		@profile render(cols, 3)
 		Profile.print()
 	else	
 		cols = Matrix{Vec3}(2*200, 3*200) # height, width
 		c = RGB()
-		@time addcolor!(c, shoot(WORLD.cameras[1], 50.5/size(cols)[2], 60.5/size(cols)[1]), 0)
+		@time color(shoot(WORLD.cameras[1], 50.5/size(cols)[2], 60.5/size(cols)[1]), 0)
 		@time render(cols, 3)
 		# 90.326774 seconds (1.86 G allocations: 69.478 GB, 8.73% gc time)
 	end

@@ -54,9 +54,9 @@ function render(cols::Matrix{Vec3}, numsamples::Int)
 			samples = Matrix{Float64}(numsamples, 3)
 			#@parallel 
 			for s in 1:numsamples
-				samples[s,1:3] = color(shoot(WORLD.cameras[1], (i-1 + rand()) / size(cols)[2], (j-1 + rand()) / size(cols)[1]), 0) / numsamples
+				samples[s,1:3] = color(shoot(WORLD.cameras[1], (i-1 + rand()) / size(cols)[2], (j-1 + rand()) / size(cols)[1]), 0)
 			end
-			cols[j,i] =  Vec3(sum(samples[1:numsamples]), sum(samples[(1+numsamples):2numsamples]), sum(samples[1+2numsamples:3numsamples]))
+			cols[j,i] =  Vec3(sum(samples[1:numsamples]) / numsamples, sum(samples[(1+numsamples):2numsamples]) / numsamples, sum(samples[1+2numsamples:3numsamples]) / numsamples)
 		end
 	end
 end

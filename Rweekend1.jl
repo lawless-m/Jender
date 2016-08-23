@@ -48,10 +48,10 @@ function push_random_entities!(entities::Vector{Entity})
 end
 
 function render(cols::Matrix{Vec3}, numsamples::Int)
+	samples = Matrix{Float64}(numsamples, 3)
 	for j in size(cols)[1]:-1:1 # makes the next line be a countdown rather than up
 		println("Row $j")
 		for i in 1:size(cols)[2]
-			samples = Matrix{Float64}(numsamples, 3)
 			#@parallel 
 			for s in 1:numsamples
 				samples[s,1:3] = color(shoot(WORLD.cameras[1], (i-1 + rand()) / size(cols)[2], (j-1 + rand()) / size(cols)[1]), 0)
@@ -107,7 +107,7 @@ else
 		#@time addcolor!(c, shoot(WORLD.cameras[1], 50.5/size(cols)[2], 60.5/size(cols)[1]), 0)
 		#println(c) #   Vecs.RGB(0.1087251386964388,0.0434686890557862,0.18448252480043215)
 		#quit()
-		@time render(cols, 5)
+		@time render(cols, 3)
 		# 90.326774 seconds (1.86 G allocations: 69.478 GB, 8.73% gc time)
 	end
 	writepgm(cols, "Profiled")

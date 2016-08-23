@@ -85,5 +85,9 @@ function scatter(m::Dielectric, ray::Ray, hit)
 	true, Ray(hit.p, rand() < reflect_prob ? reflection : refraction, ray.time), [1.0, 1.0, 1.0]
 end
 
+immutable Diffuse
+
+end
+
 end
 

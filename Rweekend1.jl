@@ -1,5 +1,9 @@
 unshift!(LOAD_PATH, ".")
 
+#=
+TheNextWeek https://github.com/petershirley/raytracingthenextweek/
+=#
+
 using Vecs: zero, Vec3, unitVector
 using Entities: World, Entity, Sphere, MovingSphere, hitWorld, hitEntity!
 using Materials: Lambertian, Metal, Dielectric

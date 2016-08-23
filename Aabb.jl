@@ -27,3 +27,6 @@ function hit(aabb::Aabb, ray::Ray, tmin::Float64, tmax::Float64)
 	return true
 end
 
+function surrounding_box(b0::Aabb, b1::Aabb)
+	Aabb(Vec3(min(b0.min.x, b1.min.x), min(b0.min.y, b1.min.y), min(b0.min.z, b1.min.z)), Vec3(max(b0.max.x, b1.max.x), max(b0.max.y, b1.max.y), max(b0.max.z, b1.max.z))
+end

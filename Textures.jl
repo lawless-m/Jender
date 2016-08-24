@@ -33,3 +33,14 @@ function value(n::Noise, p::Vec3, u::Float64, v::Float64)
 	Vec3(1) * 0.5(1 + sin(n.scale*p.x + 5turbulence(n.noise, n.scale*p)))
 end
 
+immutable Image <: Texture
+	rgb::Matrix{Vec3}
+end
+
+function value(img::Image, p::Vec3, u::Float64, v::Float64)
+	w, h = size(img)
+	i = min(max(0, floor(Int, w*u)), w-1)
+	j = min(max(0, floor(Int, h*(1-v) - 0.001)), h-1)
+	img.rgb[i, j]
+end
+

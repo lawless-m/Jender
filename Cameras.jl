@@ -45,9 +45,9 @@ type Camera
 end
 
 function shoot(c::Camera, s::Float64, t::Float64)
-		rd = c.lens_radius * rand_in_unit_disk()
-		offset = c.u * rd.x + c.v * rd.y
-		Ray(c.origin + offset, c.lower_left + s * c.horizontal + t * c.vertical - c.origin - offset, c.time0 + rand()*(c.time1-c.time0))
+	rd = c.lens_radius * rand_in_unit_disk()
+	offset = c.u * rd.x + c.v * rd.y
+	Ray(c.origin + offset, c.lower_left + s * c.horizontal + t * c.vertical - c.origin - offset, c.time0 + rand()*(c.time1-c.time0))
 end
 
 

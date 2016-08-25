@@ -29,18 +29,16 @@ function color(r::Ray, depth::Int)
 end
 
 function push_random_entities!(entities::Vector{Entity})
-	for a in -11:10
-		for b in -11:10
-			choose_mat = rand()
-			center = Vec3(a + 0.9rand(), 0.2, b + 0.9rand())
-			if length(center - Vec3(4.0, 0.2, 0.0)) > 0.9
-				if choose_mat < 0.8
-					push!(entities, MovingSphere(center, center+Vec3(0, 0.5*rand(), 0), 0.0, 1.0, 0.2, Lambertian(rand()*rand(), rand()*rand(), rand()*rand())))
-				elseif choose_mat < 0.95
-					push!(entities, Sphere(center, 0.2, Metal(0.5(1+rand()), 0.5(1+rand()), 0.5(1+rand()), 0.5rand())))
-				else
-					push!(entities, Sphere(center, 0.2, Dielectric(1.5)))
-				end
+	for a in -11:10, b in -11:10
+		choose_mat = rand()
+		center = Vec3(a + 0.9rand(), 0.2, b + 0.9rand())
+		if length(center - Vec3(4.0, 0.2, 0.0)) > 0.9
+			if choose_mat < 0.8
+				push!(entities, MovingSphere(center, center+Vec3(0, 0.5*rand(), 0), 0.0, 1.0, 0.2, Lambertian(rand()*rand(), rand()*rand(), rand()*rand())))
+			elseif choose_mat < 0.95
+				push!(entities, Sphere(center, 0.2, Metal(0.5(1+rand()), 0.5(1+rand()), 0.5(1+rand()), 0.5rand())))
+			else
+				push!(entities, Sphere(center, 0.2, Dielectric(1.5)))
 			end
 		end
 	end
@@ -84,7 +82,6 @@ function writepgm(cols::Matrix, filename)
 			write(pgm, "$(f(cols[j,i].x)) $(f(cols[j,i].y)) $(f(cols[j,i].z)) ")
 		end
 		write(pgm, "\n")
-		
 	end
 	close(pgm)
 end

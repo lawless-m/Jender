@@ -10,7 +10,7 @@ immutable Ray
 end
 
 function pointAt(r::Ray, t::Float64)
-	r.origin + t * r.direction
+	Vec3(r.origin.x + t * r.direction.x, r.origin.y + t * r.direction.y, r.origin.z + t * r.direction.z)
 end
 
 end

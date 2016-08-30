@@ -5,6 +5,10 @@ using Materials: Material, Null
 using Rays: Ray, pointAt
 using Cameras: Camera
 
+macro dot(a, b)
+	:($a.x*$b.x + $a.y*$b.y + $a.z*$b.z)
+end
+
 type Hit
 	t::Float64
 	p::Vec3
@@ -40,9 +44,9 @@ immutable Sphere <: Entity
 end
 
 function hitEntity!(last_hit::Hit, s::Sphere, ray::Ray, t_min::Float64)
-	oc = Vec3(ray.origin.x - s.center.x, ray.origin.y - s.center.y, ray.origin.z - s.center.z) #oc = ray.origin - s.center
-	b = dot(oc, ray.direction)
-	c = dot(oc, oc) - s.radius2
+	oc = ray.origin - s.center
+	b = @dot oc ray.direction
+	c = (@dot oc oc) - s.radius2
 	
 #=	discriminant = b^2 - ray.dot * c
 	if discriminant <= 0

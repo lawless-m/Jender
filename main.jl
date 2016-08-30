@@ -74,6 +74,9 @@ function writepgm(cols::Matrix, filename)
 	close(pgm)
 end
 
+
+srand(0)
+
 entities = Entity[
 			Sphere(0,-1000,0, 1000, Lambertian(0.5, 0.5, 0.5))
 			, Sphere(0, 1, 0, 1.0, Dielectric(1.5))
@@ -84,6 +87,7 @@ entities = Entity[
 
 const SAMPLES = 10
 const WORLD = World(entities, [Camera(Vec3(13,2,3), Vec3(0,0,0), Vec3(0,1,0), 20.0, 3/2, 0.1, 10.0)])
+
 
 println("Build world")
 push_random_entities!(entities)
@@ -103,7 +107,7 @@ else
 		#println(c) #   Vecs.RGB(0.1087251386964388,0.0434686890557862,0.18448252480043215)
 		#quit()
 		@time render(cols, 3)
-		#  40.503589 seconds (1.89 G allocations: 70.435 GB, 7.87% gc time)
+		# 43.533887 seconds (1.88 G allocations: 70.126 GB, 7.20% gc time)
 	end
 	writepgm(cols, "Profiled")
 end

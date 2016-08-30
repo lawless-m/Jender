@@ -1,42 +1,10 @@
 module Vecs
 
-type RGB
-	r::Float64
-	g::Float64
-	b::Float64
-	RGB() = new(0.0, 0.0, 0.0)
-end
-
-function zero(rgb::RGB)
-	rgb.r = 0
-	rgb.g = 0
-	rgb.b = 0
-end
-
-function Base.(:(/))(v::RGB, f::Real)
-	v.r /= f
-	v.g /= f
-	v.b /= f
-	v
-end
-
-function Base.(:(+))(v::RGB, f::Real)
-	v.r += f
-	v.g += f
-	v.b += f
-end
-
-function Base.(:(+))(a::RGB, b::RGB)
-	a.r += b.r
-	a.g += b.g
-	a.b += b.b
-end
 immutable Vec3
 	x::Float64
 	y::Float64
 	z::Float64
 	Vec3() = new(0.0, 0.0, 0.0)
-	Vec3(rgb::RGB) = new(rgb.r, rgb.g, rgb.b)
 	Vec3(x, y, z) = new(x, y, z)
 	Vec3(v::Vector) = new(v[1], v[2], v[3])
 	Vec3(v::Vec3) = new(v.x, v.y, v.z)

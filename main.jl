@@ -5,7 +5,7 @@ C++ version hosted at http://goo.gl/9yItEO http://goo.gl/sBih70
 
 unshift!(LOAD_PATH, ".")
 
-using Vecs: RGB, zero, Vec3, unitVector
+using Vecs: zero, Vec3, unitVector
 using Entities: World, Entity, Sphere, hitWorld, hitEntity!
 using Materials: Lambertian, Metal, Dielectric
 using Rays: Ray, pointAt
@@ -82,8 +82,6 @@ entities = Entity[
 		]
 
 
-const WIDTH = 1200
-const HEIGHT = 800
 const SAMPLES = 10
 const WORLD = World(entities, [Camera(Vec3(13,2,3), Vec3(0,0,0), Vec3(0,1,0), 20.0, 3/2, 0.1, 10.0)])
 
@@ -96,15 +94,12 @@ if false
 	writepgm(cols, "Weekend1")
 else 
 	if false 
-		cols = Matrix{Vec3}(2*100, 3*100) # height, width
-		c = RGB()
-		#addcolor!(c, shoot(WORLD.cameras[1], 50.5/size(cols)[2], 60.5/size(cols)[1]), 0)
+		cols = Matrix{Vec3}(2*100, 3*100) # height, width		#addcolor!(shoot(WORLD.cameras[1], 50.5/size(cols)[2], 60.5/size(cols)[1]), 0)
 		@profile render(cols, 3)
 		Profile.print()
 	else	
 		cols = Matrix{Vec3}(2*200, 3*200) # height, width
-		c = RGB()
-		#@time addcolor!(c, shoot(WORLD.cameras[1], 50.5/size(cols)[2], 60.5/size(cols)[1]), 0)
+		@time color(shoot(WORLD.cameras[1], 50.5/size(cols)[2], 60.5/size(cols)[1]), 0)
 		#println(c) #   Vecs.RGB(0.1087251386964388,0.0434686890557862,0.18448252480043215)
 		#quit()
 		@time render(cols, 3)

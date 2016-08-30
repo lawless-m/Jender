@@ -103,7 +103,7 @@ else
 		#println(c) #   Vecs.RGB(0.1087251386964388,0.0434686890557862,0.18448252480043215)
 		#quit()
 		@time render(cols, 3)
-		# 90.326774 seconds (1.86 G allocations: 69.478 GB, 8.73% gc time)
+		#  40.503589 seconds (1.89 G allocations: 70.435 GB, 7.87% gc time)
 	end
 	writepgm(cols, "Profiled")
 end

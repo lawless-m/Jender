@@ -97,7 +97,7 @@ if false
 	@time render(cols, SAMPLES)
 	writepgm(cols, "Weekend1")
 else 
-	if false 
+	if true 
 		cols = Matrix{Vec3}(2*100, 3*100) # height, width		#addcolor!(shoot(WORLD.cameras[1], 50.5/size(cols)[2], 60.5/size(cols)[1]), 0)
 		@profile render(cols, 3)
 		Profile.print()
@@ -107,7 +107,7 @@ else
 		#println(c) #   Vecs.RGB(0.1087251386964388,0.0434686890557862,0.18448252480043215)
 		#quit()
 		@time render(cols, 3)
-		# 43.533887 seconds (1.88 G allocations: 70.126 GB, 7.20% gc time)
+		# 41.266644 seconds (1.88 G allocations: 70.126 GB, 7.87% gc time)
 	end
 	writepgm(cols, "Profiled")
 end

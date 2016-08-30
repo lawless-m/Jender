@@ -9,6 +9,18 @@ macro dot(a, b)
 	:($a.x*$b.x + $a.y*$b.y + $a.z*$b.z)
 end
 
+macro pointAt(r, t)
+	:(Vec3($r.origin.x + $t * $r.direction.x, $r.origin.y + $t * $r.direction.y, $r.origin.z + $t * $r.direction.z))
+end
+
+macro diff(r, s)
+	:(Vec3($r.x - $s.x, $r.y - $s.y, $r.z - $s.z))
+end
+
+macro diffdiv(r, s, f)
+	:(Vec3(($r.x - $s.x)/$f, ($r.y - $s.y)/$f, ($r.z - $s.z)/$f))
+end
+
 type Hit
 	t::Float64
 	p::Vec3
@@ -44,8 +56,8 @@ immutable Sphere <: Entity
 end
 
 function hitEntity!(last_hit::Hit, s::Sphere, ray::Ray, t_min::Float64)
-	oc = ray.origin - s.center
-	b = @dot oc ray.direction
+	oc = @diff(ray.origin, s.center)
+	b = @dot(oc, ray.direction)
 	c = (@dot oc oc) - s.radius2
 	
 #=	discriminant = b^2 - ray.dot * c
@@ -67,13 +79,13 @@ function hitEntity!(last_hit::Hit, s::Sphere, ray::Ray, t_min::Float64)
 	
 	if -sd < tmx &&  -sd > tmn
 		last_hit.t = (-b - sd) / ray.dot
-		last_hit.p = pointAt(ray, last_hit.t)
-		last_hit.normal = (last_hit.p - s.center) / s.radius
+		last_hit.p = @pointAt(ray, last_hit.t)
+		last_hit.normal = @diffdiv(last_hit.p, s.center, s.radius)
 		last_hit.material = s.material
 	elseif sd < tmx && sd > tmn
 		last_hit.t = (-b + sd) / ray.dot
-		last_hit.p = pointAt(ray, last_hit.t)
-		last_hit.normal = (last_hit.p - s.center) / s.radius
+		last_hit.p = @pointAt(ray, last_hit.t)
+		last_hit.normal = @diffdiv(last_hit.p, s.center, s.radius)
 		last_hit.material = s.material
 		return
 	end

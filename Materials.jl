@@ -35,6 +35,16 @@ abstract Material
 immutable Null <: Material
 end
 
+function scatter(m::Null, ray::Ray, hit)
+	Scatter(false, Ray(Vec3(0), Vec3(0)), Float64[0,0,0])
+end
+
+immutable Scatter
+	action::Bool
+	ray::Ray
+	attenuation::Vector{Float64}
+end
+
 immutable Lambertian <: Material
 	albedo::Vector{Float64}
 	Lambertian(r, g, b) = new(Float64[r, g, b])
@@ -43,7 +53,7 @@ end
 
 function scatter(m::Lambertian, ray::Ray, hit)
 	target = hit.p + hit.normal + random_in_unit_sphere()
-	true, Ray(hit.p, target - hit.p), m.albedo
+	Scatter(true, Ray(hit.p, target - hit.p), m.albedo)
 end
 
 immutable Metal <: Material
@@ -55,7 +65,7 @@ end
 function scatter(m::Metal, ray::Ray, hit)
 	reflection = reflect(unitVector(ray.direction), hit.normal)
 	scatter = Ray(hit.p, reflection + m.fuzz * random_in_unit_sphere())
-	dot(scatter.direction, hit.normal) > 0, scatter, m.albedo
+	Scatter(dot(scatter.direction, hit.normal) > 0, scatter, m.albedo)
 end
 
 immutable Dielectric <: Material
@@ -82,7 +92,7 @@ function scatter(m::Dielectric, ray::Ray, hit)
 	
 	refraction = refract(ray.direction, outward_normal, ni_over_nt)
 	reflect_prob = refraction == nothing ? 1.0 : schlick(cosine, m.ref_idx)
-	true, Ray(hit.p, rand() < reflect_prob ? reflection : refraction), [1.0, 1.0, 1.0]
+	Scatter(true, Ray(hit.p, rand() < reflect_prob ? reflection : refraction), Float64[1.0, 1.0, 1.0])
 end
 
 end

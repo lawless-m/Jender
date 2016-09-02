@@ -34,6 +34,9 @@ abstract Entity
 immutable World
 	entities::Vector{Entity}
 	cameras::Vector{Camera}
+	World() = new(Entity[], Camera[])
+	World(e) = new(e, Camera[])
+	World(e, c) = new(e, c)
 end
 
 function hitWorld(world::World, ray::Ray, t_min::Float64, t_max::Float64)
@@ -41,9 +44,8 @@ function hitWorld(world::World, ray::Ray, t_min::Float64, t_max::Float64)
 	for entity in world.entities
 		hitEntity!(last_hit, entity, ray, t_min)
 	end
-	if last_hit.t < t_max
-		return last_hit
-	end
+	return last_hit
+
 end
 
 immutable Sphere <: Entity
@@ -72,23 +74,24 @@ function hitEntity!(last_hit::Hit, s::Sphere, ray::Ray, t_min::Float64)
 		return
 	end
 
-	sd = sqrt(b^2 - ray.dot * c) # sqrt discriminant
+	rdot = ray.dot
+	sd = sqrt(b^2 - rdot * c) # sqrt discriminant
 	
-	tmx = last_hit.t * ray.dot + b
-	tmn = t_min * ray.dot + b
+	tmx = last_hit.t * rdot + b
+	tmn = t_min * rdot + b
 	
 	if -sd < tmx &&  -sd > tmn
-		last_hit.t = (-b - sd) / ray.dot
+		last_hit.t = (-b - sd) / rdot
 		last_hit.p = @pointAt(ray, last_hit.t)
 		last_hit.normal = @diffdiv(last_hit.p, s.center, s.radius)
 		last_hit.material = s.material
 	elseif sd < tmx && sd > tmn
-		last_hit.t = (-b + sd) / ray.dot
+		last_hit.t = (-b + sd) / rdot
 		last_hit.p = @pointAt(ray, last_hit.t)
 		last_hit.normal = @diffdiv(last_hit.p, s.center, s.radius)
 		last_hit.material = s.material
-		return
 	end
+	return
 end
 
 end

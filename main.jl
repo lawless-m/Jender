@@ -3,61 +3,32 @@ C++ version hosted at http://goo.gl/9yItEO http://goo.gl/sBih70
 
 =#
 
+addprocs(4)
 unshift!(LOAD_PATH, ".")
-
 using Vecs: zero, Vec3, unitVector
-using Entities: World, Entity, Sphere, hitWorld, hitEntity!
+using Entities: WORLD, World, pushEntity!, pushCamera!, Entity, Sphere, hitWorld, hitEntity!
 using Materials: Material, Lambertian, Metal, Dielectric
 using Rays: Ray, pointAt
 using Cameras: Camera, shoot
 
-function color(r::Ray, depth::Int)
-	h = hitWorld(WORLD, r, 0.001, Inf)
-	if h.t == Inf
-		unit_direction = unitVector(r.direction)
-		t = 0.5(unit_direction.y + 1)
-		return Float64[(1-t) + 0.5t, (1-t)+0.7t, (1-t)+t]
+function renderPixel(i, j, w, h, numsamples)
+	c = Float64[0,0,0] 
+	for s in 1:numsamples
+		c += Rays.color(shoot(WORLD.cameras[1], (i-1 + rand()) / w, (j-1 + rand()) / h), 0)
 	end
-	
-	if depth < 50
-		s = Materials.scatter(h.material, r, h)
-		if s.action
-			return s.attenuation .* color(s.ray, depth+1)
-		end
-	end
-	
-	return Float64[0.0, 0.0, 0.0]
-end
-
-function push_random_entities!()
-	for a in -11:10
-		for b in -11:10
-			choose_mat = rand()
-			center = Vec3(a + 0.9rand(), 0.2, b + 0.9rand())
-			if length(center - Vec3(4.0, 0.2, 0.0)) > 0.9
-				if choose_mat < 0.8
-					push!(WORLD.entities, Sphere(center, 0.2, Lambertian(rand()*rand(), rand()*rand(), rand()*rand())))
-				elseif choose_mat < 0.95
-					push!(WORLD.entities, Sphere(center, 0.2, Metal(0.5(1+rand()), 0.5(1+rand()), 0.5(1+rand()), 0.5rand())))
-				else
-					push!(WORLD.entities, Sphere(center, 0.2, Dielectric(1.5)))
-				end
-			end
-		end
-	end
+	c
 end
 
 function render(cols::Matrix{Vec3}, numsamples::Int)
-	samples = Matrix{Float64}(numsamples, 3)
+	refs = Vector{RemoteRef}(numsamples)
+	samples = Vector{Vector{Float64}}(numsamples)
 	
 	for i in 1:size(cols)[2]
 		println("Column $(size(cols)[2]-i)")
-			#@parallel 
+			
 		for j in 1:size(cols)[1] 
-			for s in 1:numsamples
-				samples[s,1:3] = color(shoot(WORLD.cameras[1], (i-1 + rand()) / size(cols)[2], (j-1 + rand()) / size(cols)[1]), 0)
-			end
-			cols[j,i] =  Vec3(sum(samples[1:numsamples]) / numsamples, sum(samples[(1+numsamples):2numsamples]) / numsamples, sum(samples[1+2numsamples:3numsamples]) / numsamples)
+			pixel = renderPixel(i, j, size(cols)[2], size(cols)[1], numsamples)
+			cols[j,i] =  Vec3(pixel[1] / numsamples, pixel[2] / numsamples, pixel[3] / numsamples)
 		end
 	end
 end
@@ -77,16 +48,15 @@ end
 
 srand(0)
 const SAMPLES = 10
-const WORLD = World(Entity[
-			Sphere(0,-1000,0, 1000, Lambertian(0.5, 0.5, 0.5))
-			, Sphere(0, 1, 0, 1.0, Dielectric(1.5))
-			, Sphere(-4, 1, 0, 1.0, Lambertian(0.4, 0.2, 0.1))
-			, Sphere(4, 1, 0, 1.0, Metal(0.7, 0.6, 0.5, 0.0))
-		])
-push!(WORLD.cameras, Camera(Vec3(13,2,3), Vec3(0,0,0), Vec3(0,1,0), 20.0, 3/2, 0.1, 10.0))
+		
+pushEntity!(Sphere(0,-1000,0, 1000, Lambertian(0.5, 0.5, 0.5)))
+pushEntity!(Sphere(0, 1, 0, 1.0, Dielectric(1.5)))
+pushEntity!(Sphere(-4, 1, 0, 1.0, Lambertian(0.4, 0.2, 0.1)))
+pushEntity!(Sphere(4, 1, 0, 1.0, Metal(0.7, 0.6, 0.5, 0.0)))
+pushCamera!(Camera(Vec3(13,2,3), Vec3(0,0,0), Vec3(0,1,0), 20.0, 3/2, 0.1, 10.0))
 
 println("Build world")
-push_random_entities!()
+Entities.push_random_entities!()
 
 function noprofile()
 	cols = Matrix{Vec3}(2*400, 3*400) # height, width
@@ -105,11 +75,11 @@ end
 
 function timed()
 	cols = Matrix{Vec3}(2*200, 3*200) # height, width
-	@time color(shoot(WORLD.cameras[1], 50.5/size(cols)[2], 60.5/size(cols)[1]), 0)
+	@time Rays.color(shoot(WORLD.cameras[1], 50.5/size(cols)[2], 60.5/size(cols)[1]), 0)
 	#println(c) #   Vecs.RGB(0.1087251386964388,0.0434686890557862,0.18448252480043215)
 	#quit()
 	@time render(cols, 3)
-	@time render(cols, 3)
+	#@time render(cols, 3)
 	# 42.015203 seconds (1.88 G allocations: 70.071 GB, 8.08% gc time)
 	writepgm(cols, "Profiled")
 end	

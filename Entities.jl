@@ -1,7 +1,7 @@
 module Entities
 
 using Vecs: Vec3
-using Materials: Material, Null
+using Materials
 using Rays: Ray, pointAt
 using Cameras: Camera
 
@@ -25,8 +25,8 @@ type Hit
 	t::Float64
 	p::Vec3
 	normal::Vec3
-	material::Material
-	Hit(t_max) = new(t_max, Vec3(), Vec3(), Null())
+	material::Materials.Material
+	Hit(t_max) = new(t_max, Vec3(), Vec3(), Materials.Null())
 end
 
 abstract Entity
@@ -39,20 +39,47 @@ immutable World
 	World(e, c) = new(e, c)
 end
 
-function hitWorld(world::World, ray::Ray, t_min::Float64, t_max::Float64)
+const WORLD = World()
+
+function pushCamera!(c::Camera)
+	push!(WORLD.cameras, c)
+end
+
+function pushEntity!(en::Entity)
+	push!(WORLD.entities, en)
+end
+
+function hitWorld(ray::Ray, t_min::Float64, t_max::Float64)
 	last_hit = Hit(t_max)
-	for entity in world.entities
+	for entity in WORLD.entities
 		hitEntity!(last_hit, entity, ray, t_min)
 	end
 	return last_hit
+end
 
+function push_random_entities!()
+	for a in -11:10
+		for b in -11:10
+			choose_mat = rand()
+			center = Vec3(a + 0.9rand(), 0.2, b + 0.9rand())
+			if length(center - Vec3(4.0, 0.2, 0.0)) > 0.9
+				if choose_mat < 0.8
+					pushEntity!(Sphere(center, 0.2, Materials.Lambertian(rand()*rand(), rand()*rand(), rand()*rand())))
+				elseif choose_mat < 0.95
+					pushEntity!(Sphere(center, 0.2, Materials.Metal(0.5(1+rand()), 0.5(1+rand()), 0.5(1+rand()), 0.5rand())))
+				else
+					pushEntity!(Sphere(center, 0.2, Materials.Dielectric(1.5)))
+				end
+			end
+		end
+	end
 end
 
 immutable Sphere <: Entity
 	center::Vec3
 	radius::Float64
 	radius2::Float64
-	material::Material
+	material::Materials.Material
 	Sphere(x, y, z, r, m) = new(Vec3(x, y, z), r, r^2, m)
 	Sphere(xyz, r, m) = new(xyz, r, r^2, m)
 end

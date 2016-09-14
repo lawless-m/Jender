@@ -4,7 +4,7 @@ using Vecs: Vec3
 using Materials: Material, Null
 using Rays: Ray, pointAt
 using Cameras: Camera
-using Aabbs: Aabb
+using Aabb: Aabb
 
 type Hit
 	t::Float64

@@ -30,14 +30,14 @@ end
 
 function writepgm(pipeline, w, h, filename)
 	f(v::Float64) = floor(Int,255.99*sqrt(v))
-	pgm = open("$filename.pgm", "w")
-	write(pgm, "P3\n$w $h 255\n")
+	pgm = open(filename * ".pgm", "w")
+	@printf pgm "P3\n%d %d 255\n" w h
 	for j in 1:h
 		for i in 1:w
 			pixel = consume(pipeline)
-			write(pgm, "$(f(pixel[1])) $(f(pixel[2])) $(f(pixel[3])) ")
+			@printf pgm "%d %d %d " f(pixel[1]) f(pixel[2]) f(pixel[3])
 		end
-		write(pgm, "\n")
+		@printf pgm "\n"
 	end
 	close(pgm)
 end

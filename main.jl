@@ -22,7 +22,9 @@ end
 function render(w::Int, h::Int, numsamples::Int)
 	for j in h:-1:1
 		println("Row $j")
-		produce([renderPixel(i, j, w, h, numsamples) for i in 1:w])
+		for i in 1:w
+			produce(renderPixel(i, j, w, h, numsamples))
+		end
 	end
 end
 
@@ -31,9 +33,9 @@ function writepgm(pipeline, w, h, filename)
 	pgm = open("$filename.pgm", "w")
 	write(pgm, "P3\n$w $h 255\n")
 	for j in 1:h
-		row = consume(pipeline)
 		for i in 1:w
-			write(pgm, "$(f(row[i][1])) $(f(row[i][2])) $(f(row[i][3])) ")
+			pixel = consume(pipeline)
+			write(pgm, "$(f(pixel[1])) $(f(pixel[2])) $(f(pixel[3])) ")
 		end
 		write(pgm, "\n")
 	end
@@ -70,5 +72,5 @@ function small()
 	writepgm(Task(()->@time render(w, h, 1)), w, h, "Small1")
 end	
 
-profiled()
+small()
 

@@ -1,6 +1,5 @@
 module Cameras
 
-
 using Vecs: Vec3, unitVector
 using Rays: Ray
 

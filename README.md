@@ -9,9 +9,13 @@ The C++ Code is at : https://github.com/petershirley/raytracinginoneweekend
 
 I'm not versed enough in Github Lore to know how to link them together beyond a URL :)
 
-Run Rweekend1.jl to produce Rweekend1.pgm
+cd into the directory and run julia main.jl
 
-This code is currently a naive translation, it needs some optimizing.
+hand edit main.jl to run timed / profiled code
+
+the output file is rendered progressively so if you have something like Gimp that can view PGM files without them being complete, it mean you can refresh it as it renders and see progress
 
 <img src="https://i.sli.mg/jdRzFH.png" width="800" height="600">
+
+I'm making a branch for Rendering the next week
 

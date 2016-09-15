@@ -20,9 +20,6 @@ function renderPixel(i::Int, j::Int, w::Int, h::Int, numsamples::Int)
 end
 
 function render(w::Int, h::Int, numsamples::Int)
-	refs = Vector{RemoteRef}(numsamples)
-	samples = Vector{Vector{Float64}}(numsamples)
-	
 	for j in h:-1:1
 		println("Row $j")
 		produce([Vec3(renderPixel(i, j, w, h, numsamples)) for i in 1:w])

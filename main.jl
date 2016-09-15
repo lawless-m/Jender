@@ -22,7 +22,7 @@ end
 function render(w::Int, h::Int, numsamples::Int)
 	for j in h:-1:1
 		println("Row $j")
-		produce([Vec3(renderPixel(i, j, w, h, numsamples)) for i in 1:w])
+		produce([renderPixel(i, j, w, h, numsamples) for i in 1:w])
 	end
 end
 
@@ -33,7 +33,7 @@ function writepgm(pipeline, w, h, filename)
 	for j in 1:h
 		row = consume(pipeline)
 		for i in 1:w
-			write(pgm, "$(f(row[i].x)) $(f(row[i].y)) $(f(row[i].z)) ")
+			write(pgm, "$(f(row[i][1])) $(f(row[i][2])) $(f(row[i][3])) ")
 		end
 		write(pgm, "\n")
 	end
@@ -70,5 +70,5 @@ function small()
 	writepgm(Task(()->@time render(w, h, 1)), w, h, "Small1")
 end	
 
-best()
+profiled()
 

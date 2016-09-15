@@ -20,11 +20,8 @@ function renderPixel(i::Int, j::Int, w::Int, h::Int, numsamples::Int)
 end
 
 function render(w::Int, h::Int, numsamples::Int)
-	for j in h:-1:1
-		println("Row $j")
-		for i in 1:w
-			renderPixel(i, j, w, h, numsamples)
-		end
+	for j in h:-1:1, i in 1:w
+		renderPixel(i, j, w, h, numsamples)
 	end
 end
 
@@ -33,6 +30,7 @@ function writepgm(pipeline, w, h, filename)
 	pgm = open(filename * ".pgm", "w")
 	@printf pgm "P3\n%d %d 255\n" w h
 	for j in 1:h
+		println("Row $j")
 		for i in 1:w
 			pixel = consume(pipeline)
 			@printf pgm "%d %d %d " f(pixel[1]) f(pixel[2]) f(pixel[3])

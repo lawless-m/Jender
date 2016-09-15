@@ -30,7 +30,7 @@ function writepgm(pipeline, w, h, filename)
 	pgm = open(filename * ".pgm", "w")
 	@printf pgm "P3\n%d %d 255\n" w h
 	for j in 1:h
-		println("Row $j")
+		println("Row $(h-j)")
 		for i in 1:w
 			pixel = consume(pipeline)
 			@printf pgm "%d %d %d " f(pixel[1]) f(pixel[2]) f(pixel[3])

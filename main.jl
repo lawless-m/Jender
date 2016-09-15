@@ -72,5 +72,5 @@ function small()
 	writepgm(Task(()->@time render(w, h, 1)), w, h, "Small1")
 end	
 
-small()
+best()
 

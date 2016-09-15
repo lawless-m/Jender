@@ -16,14 +16,14 @@ function renderPixel(i::Int, j::Int, w::Int, h::Int, numsamples::Int)
 	for s in 1:numsamples
 		c += Rays.color(shoot(WORLD.cameras[1], (i-1 + rand()) / w, (j-1 + rand()) / h), 0)
 	end
-	c / numsamples
+	produce(c / numsamples)
 end
 
 function render(w::Int, h::Int, numsamples::Int)
 	for j in h:-1:1
 		println("Row $j")
 		for i in 1:w
-			produce(renderPixel(i, j, w, h, numsamples))
+			renderPixel(i, j, w, h, numsamples)
 		end
 	end
 end

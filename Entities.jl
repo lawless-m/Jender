@@ -4,7 +4,7 @@ using Vecs: Vec3
 using Materials: Material, Null
 using Rays: Ray, pointAt
 using Cameras: Camera
-using Aabb: Aabb
+using Aabbs: Aabb
 
 type Hit
 	t::Float64
@@ -80,8 +80,8 @@ immutable MovingSphere <: Entity
 end
 
 function hitEntity!(last_hit::Hit, s::MovingSphere, ray::Ray, t_min::Float64)
-	center = s.center(ray.time)
-	oc = ray.origin - center
+	senter = center(s, ray.time)
+	oc = ray.origin - senter
 	b = dot(oc, ray.direction)
 	c = dot(oc, oc) - s.radius_sq
 	if b^2 <= ray.dot * c # discriminant <= 0
@@ -93,21 +93,21 @@ function hitEntity!(last_hit::Hit, s::MovingSphere, ray::Ray, t_min::Float64)
 	if -sd < tmx &&  -sd > tmn
 		last_hit.t = (-b - sd) / ray.dot
 		last_hit.p = pointAt(ray, last_hit.t)
-		last_hit.normal = (last_hit.p - center) / s.radius
+		last_hit.normal = (last_hit.p - senter) / s.radius
 		last_hit.material = s.material
 	elseif sd < tmx && sd > tmn
 		last_hit.t = (-b + sd) / ray.dot
 		last_hit.p = pointAt(ray, last_hit.t)
-		last_hit.normal = (last_hit.p - center) / s.radius
+		last_hit.normal = (last_hit.p - senter) / s.radius
 		last_hit.material = s.material
 	end
 end
 
-function center(s::MovingSphere, t::Float64)
-    s.center0 + ((time - s.time0) / (s.time1 - time0))*(s.center1 - s.center0);
+function center(s::MovingSphere, time::Float64)
+    s.center0 + ((time - s.time0) / (s.time1 - s.time0))*(s.center1 - s.center0);
 end
 
-function bounding_box(s::MovingSphere, t0::Float64, t1::Float)
+function bounding_box(s::MovingSphere, t0::Float64, t1::Float64)
     surrounding_box(Aabb(s.center(t0) - Vec3(s.radius), s.center(t0) + Vec3(s.radius)), Aabb(s.center(t1) - Vec3(s.radius), s.center(t1) + Vec3(s.radius)));
 end
 

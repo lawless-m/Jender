@@ -1,17 +1,19 @@
 module Entities
 
 using Vecs: Vec3
-using Materials: Material, Null
+using Materials
 using Rays: Ray, pointAt
 using Cameras: Camera
 using Aabbs: Aabb
+
+export WORLD, World, Entity, Sphere, MovingSphere, hitWorld, hitEntity!, pushEntity!, push_random_entities!, pushCamera!
 
 type Hit
 	t::Float64
 	p::Vec3
 	normal::Vec3
-	material::Material
-	Hit(t_max) = new(t_max, Vec3(), Vec3(), Null())
+	material::Materials.Material
+	Hit(t_max) = new(t_max, Vec3(), Vec3(), Materials.Null())
 end
 
 abstract Entity
@@ -19,6 +21,37 @@ abstract Entity
 immutable World
 	entities::Vector{Entity}
 	cameras::Vector{Camera}
+	World() = new(Entity[], Camera[])
+	World(e) = new(e, Camera[])
+	World(e, c) = new(e, c)
+end
+
+const WORLD = World()
+
+function pushEntity!(en::Entity)
+	push!(WORLD.entities, en)
+end
+
+function pushCamera!(c::Camera)
+	push!(WORLD.cameras, c)
+end
+
+function push_random_entities!()
+	for a in -11:10
+		for b in -11:10
+			choose_mat = rand()
+			center = Vec3(a + 0.9rand(), 0.2, b + 0.9rand())
+			if length(center - Vec3(4.0, 0.2, 0.0)) > 0.9
+				if choose_mat < 0.8
+					pushEntity!(Sphere(center, 0.2, Materials.Lambertian(rand()*rand(), rand()*rand(), rand()*rand())))
+				elseif choose_mat < 0.95
+					pushEntity!(Sphere(center, 0.2, Materials.Metal(0.5(1+rand()), 0.5(1+rand()), 0.5(1+rand()), 0.5rand())))
+				else
+					pushEntity!(Sphere(center, 0.2, Materials.Dielectric(1.5)))
+				end
+			end
+		end
+	end
 end
 
 function hitWorld(world::World, ray::Ray, t_min::Float64, t_max::Float64)
@@ -35,7 +68,7 @@ immutable Sphere <: Entity
 	center::Vec3
 	radius::Float64
 	radius_sq::Float64
-	material::Material
+	material::Materials.Material
 	Sphere(x, y, z, r, m) = new(Vec3(x, y, z), r, r^2, m)
 	Sphere(xyz, r, m) = new(xyz, r, r^2, m)
 end
@@ -74,7 +107,7 @@ immutable MovingSphere <: Entity
 	time1::Float64
 	radius::Float64
 	radius_sq::Float64
-	material::Material
+	material::Materials.Material
 	MovingSphere(x0, y0, z0, x1, y1, z1, t0, t1, r, m) = new(Vec3(x0, y0, z0), Vec3(x1, y1, z1), t0, t1, r, r^2, m)
 	MovingSphere(xyz0, xyz1, t0, t1, r, m) = new(xyz0, xyz1, t0, t1, r, r^2, m)
 end

@@ -4,6 +4,8 @@ using Vecs: Vec3, unitVector, Vec3rand, squaredLength
 
 using Rays: Ray
 
+export scatter, reflect, refract, Diffuse, Lambertian, Metal, Dielectric
+
 function schlick(cosine::Float64, ref_idx::Float64)
 	r0 = ((1 - ref_idx) / (1 + ref_idx))^2
 	r0 + (1-r0) * (1-cosine)^5

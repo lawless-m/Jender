@@ -1,8 +1,10 @@
 
 module Aabbs
 
-using Vecs: Vec3
-using Rays: Ray
+using Vecs
+using Rays
+
+export Aabb, surrounding_box, hit
 
 immutable Aabb
 	min::Vec3

@@ -1,6 +1,11 @@
-using Vecs: Vec3
+module Noises
+
+using Vecs
+
+export Noises, Perlin, turbulence
 
 abstract Noises
+
 
 immutable Perlin <: Noises
 	random::Vector{Vec3}
@@ -64,3 +69,4 @@ function noise(n::Perlin, p::Vec3)
 	interpolate(c, u, v, w)
 end
 
+end

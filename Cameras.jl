@@ -1,7 +1,9 @@
 module Cameras
 
-using Vecs: Vec3, unitVector
-using Rays: Ray
+using Vecs
+using Rays
+
+export Camera
 
 function rand_in_unit_disk()
 	p = 2Vec3(rand(), rand(), 0) - Vec3(1, 1, 0)
@@ -43,7 +45,7 @@ type Camera
 	end
 end
 
-function shoot(c::Camera, s::Float64, t::Float64)
+function shootRay(c::Camera, s::Float64, t::Float64)
 	rd = c.lens_radius * rand_in_unit_disk()
 	offset = c.u * rd.x + c.v * rd.y
 	Ray(c.origin + offset, c.lower_left + s * c.horizontal + t * c.vertical - c.origin - offset, c.time0 + rand()*(c.time1-c.time0))

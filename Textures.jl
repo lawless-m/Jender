@@ -1,5 +1,9 @@
-using Vecs: Vec3
-using Noises: Perlin, turbulence
+module Textures
+
+using Vecs
+using Noises
+
+export Texture, Constant, Checker, Noise, Image, value
 
 abstract Texture
 
@@ -44,3 +48,4 @@ function value(img::Image, p::Vec3, u::Float64, v::Float64)
 	img.rgb[i, j]
 end
 
+end

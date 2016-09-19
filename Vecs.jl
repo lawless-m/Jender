@@ -1,5 +1,7 @@
 module Vecs
 
+export Vec3, RGB, unitVector, Vec3rand, squaredLength
+
 type RGB
 	r::Float64
 	g::Float64

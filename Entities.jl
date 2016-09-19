@@ -1,10 +1,10 @@
 module Entities
 
-using Vecs: Vec3
+using Vecs
 using Materials
-using Rays: Ray, pointAt
-using Cameras: Camera
-using Aabbs: Aabb
+using Rays
+using Cameras
+using Aabbs
 
 export WORLD, World, Entity, Sphere, MovingSphere, hitWorld, hitEntity!, pushEntity!, push_random_entities!, pushCamera!
 

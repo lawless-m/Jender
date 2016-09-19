@@ -1,8 +1,7 @@
 module Materials
 
-using Vecs: Vec3, unitVector, Vec3rand, squaredLength
-
-using Rays: Ray
+using Vecs
+using Rays
 
 export scatter, reflect, refract, Diffuse, Lambertian, Metal, Dielectric
 

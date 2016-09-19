@@ -7,13 +7,13 @@ TheNextWeek https://github.com/petershirley/raytracingthenextweek/
 using Vecs: zero, Vec3, unitVector
 using Entities
 using Materials
-using Rays: Ray, pointAt
+using Rays
 using Cameras: Camera, shoot
 
 function renderPixel(i::Int, j::Int, w::Int, h::Int, numsamples::Int)
 	c = Float64[0,0,0] 
 	for s in 1:numsamples
-		c += Rays.color(shoot(WORLD.cameras[1], (i-1 + rand()) / w, (j-1 + rand()) / h), 0)
+		c += rayColor(shootRay(WORLD.cameras[1], (i-1 + rand()) / w, (j-1 + rand()) / h), 0)
 	end
 	produce(c / numsamples)
 end

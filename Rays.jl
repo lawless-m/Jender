@@ -1,8 +1,10 @@
 module Rays
 
-using Vecs: Vec3, unitVector
+using Vecs
 using Entities
 using Materials
+
+export Ray, pointRayAt, rayColor
 
 immutable Ray
 	origin::Vec3
@@ -12,11 +14,11 @@ immutable Ray
 	Ray(o, d, t) = new(o, d, t, dot(d, d))
 end
 
-function pointAt(r::Ray, t::Float64)
+function pointRayAt(r::Ray, t::Float64)
 	r.origin + t * r.direction
 end
 
-function color(r::Ray, depth::Int)
+function rayColor(r::Ray, depth::Int)
 	h = hitWorld(WORLD, r, 0.001, Inf)
 	if h == nothing
 		unit_direction = unitVector(r.direction)

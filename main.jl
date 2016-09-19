@@ -1,14 +1,16 @@
-unshift!(LOAD_PATH, ".")
+
+cd(ENV["USERPROFILE"] * "/Documents")
+unshift!(LOAD_PATH, "GitHub/Jender/")
 
 #=
 TheNextWeek https://github.com/petershirley/raytracingthenextweek/
 =#
 
-using Vecs: zero, Vec3, unitVector
+using Vecs
 using Entities
 using Materials
 using Rays
-using Cameras: Camera, shoot
+using Cameras
 
 function renderPixel(i::Int, j::Int, w::Int, h::Int, numsamples::Int)
 	c = Float64[0,0,0] 

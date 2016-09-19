@@ -3,7 +3,7 @@ module Cameras
 using Vecs
 using Rays
 
-export Camera
+export Camera, shootRay
 
 function rand_in_unit_disk()
 	p = 2Vec3(rand(), rand(), 0) - Vec3(1, 1, 0)

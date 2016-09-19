@@ -29,7 +29,7 @@ function rayColor(r::Ray, depth::Int)
 	if depth < 50
 		onscreen, scattered, attenuation = scatter(h.material, r, h)
 		if onscreen
-			return attenuation .* color(scattered, depth+1)
+			return attenuation .* rayColor(scattered, depth+1)
 		end
 	end
 	

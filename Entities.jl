@@ -85,12 +85,12 @@ function hitEntity!(last_hit::Hit, s::Sphere, ray::Ray, t_min::Float64)
 	tmn = t_min * ray.dot + b
 	if -sd < tmx &&  -sd > tmn
 		last_hit.t = (-b - sd) / ray.dot
-		last_hit.p = pointAt(ray, last_hit.t)
+		last_hit.p = pointRayAt(ray, last_hit.t)
 		last_hit.normal = (last_hit.p - s.center) / s.radius
 		last_hit.material = s.material
 	elseif sd < tmx && sd > tmn
 		last_hit.t = (-b + sd) / ray.dot
-		last_hit.p = pointAt(ray, last_hit.t)
+		last_hit.p = pointRayAt(ray, last_hit.t)
 		last_hit.normal = (last_hit.p - s.center) / s.radius
 		last_hit.material = s.material
 	end
@@ -125,12 +125,12 @@ function hitEntity!(last_hit::Hit, s::MovingSphere, ray::Ray, t_min::Float64)
 	tmn = t_min * ray.dot + b
 	if -sd < tmx &&  -sd > tmn
 		last_hit.t = (-b - sd) / ray.dot
-		last_hit.p = pointAt(ray, last_hit.t)
+		last_hit.p = pointRayAt(ray, last_hit.t)
 		last_hit.normal = (last_hit.p - senter) / s.radius
 		last_hit.material = s.material
 	elseif sd < tmx && sd > tmn
 		last_hit.t = (-b + sd) / ray.dot
-		last_hit.p = pointAt(ray, last_hit.t)
+		last_hit.p = pointRayAt(ray, last_hit.t)
 		last_hit.normal = (last_hit.p - senter) / s.radius
 		last_hit.material = s.material
 	end

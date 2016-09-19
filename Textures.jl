@@ -9,6 +9,8 @@ abstract Texture
 
 immutable Constant <: Texture
 	color::Vec3
+	Constant(rgb) = new(Vec3(rgb, rgb, rgb))
+	Constant(r, g, b) = new(Vec3(r, g, b))
 end
 
 function value(c::Constant, u::Float64, v::Float64)
@@ -31,6 +33,8 @@ end
 immutable Noise <: Texture
 	noise::Perlin
 	scale::Float64
+	Noise(p, s) = new(p, s)
+	Noise(s) = new(Perlin(), s)
 end
 
 function value(n::Noise, p::Vec3, u::Float64, v::Float64)

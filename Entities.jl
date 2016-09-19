@@ -10,10 +10,12 @@ export WORLD, World, Entity, Sphere, MovingSphere, hitWorld, hitEntity!, pushEnt
 
 type Hit
 	t::Float64
+	u::Float64
+	v::Float64
 	p::Vec3
 	normal::Vec3
 	material::Materials.Material
-	Hit(t_max) = new(t_max, Vec3(), Vec3(), Materials.Null())
+	Hit(t_max) = new(t_max, 0, 0, Vec3(), Vec3(), Materials.Null())
 end
 
 abstract Entity
@@ -36,23 +38,6 @@ function pushCamera!(c::Camera)
 	push!(WORLD.cameras, c)
 end
 
-function push_random_entities!()
-	for a in -11:10
-		for b in -11:10
-			choose_mat = rand()
-			center = Vec3(a + 0.9rand(), 0.2, b + 0.9rand())
-			if length(center - Vec3(4.0, 0.2, 0.0)) > 0.9
-				if choose_mat < 0.8
-					pushEntity!(Sphere(center, 0.2, Materials.Lambertian(rand()*rand(), rand()*rand(), rand()*rand())))
-				elseif choose_mat < 0.95
-					pushEntity!(Sphere(center, 0.2, Materials.Metal(0.5(1+rand()), 0.5(1+rand()), 0.5(1+rand()), 0.5rand())))
-				else
-					pushEntity!(Sphere(center, 0.2, Materials.Dielectric(1.5)))
-				end
-			end
-		end
-	end
-end
 
 function hitWorld(world::World, ray::Ray, t_min::Float64, t_max::Float64)
 	last_hit = Hit(t_max)

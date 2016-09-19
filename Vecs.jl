@@ -141,6 +141,11 @@ function unitVector(v::Vec3)
 	v / length(v)
 end
 
+function unitVector(x, y, z)
+	l = sqrt(x^2 + y^2 + z^2)
+	Vec3(x / l, y / l, z / l)
+end
+
 function Base.(:(min))(v::Vec3)
 	min(v.x, v.y, v.z)
 end

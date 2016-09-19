@@ -2,8 +2,9 @@ module Materials
 
 using Vecs
 using Rays
+using Textures
 
-export scatter, reflect, refract, Diffuse, Lambertian, Metal, Dielectric
+export scatter, reflect, refract, emit, Diffuse, Lambertian, Metal, Dielectric, Isotropic, Diffuse
 
 function schlick(cosine::Float64, ref_idx::Float64)
 	r0 = ((1 - ref_idx) / (1 + ref_idx))^2
@@ -36,11 +37,19 @@ abstract Material
 immutable Null <: Material
 end
 
-immutable Lambertian <: Material
-	albedo::Vector{Float64}
-	Lambertian(r, g, b) = new(Float64[r, g, b])
+function emit(m::Material, u::Float64, v::Float64, p::Vec3)
+	return Float64[0,0,0]
 end
 
+function scatter(m::Material, ray::Ray, hit)
+	false, Ray(), []
+end
+
+immutable Lambertian <: Material
+	albedo::Texture
+	Lambertian(a) = new(a)
+	Lambertian(r,g,b) = new(Constant(r,g,b))
+end
 
 function scatter(m::Lambertian, ray::Ray, hit)
 	target = hit.p + hit.normal + random_in_unit_sphere()
@@ -50,7 +59,7 @@ end
 immutable Metal <: Material
 	albedo::Vector{Float64}
 	fuzz::Float64
-	Metal(r, g, b, f) = new(Float64[r, g, b], f)
+	Metal(r, g, b, f) = new(Float64[r, g, b], f<1 ? f : 1)
 end
 
 function scatter(m::Metal, ray::Ray, hit)
@@ -87,8 +96,22 @@ function scatter(m::Dielectric, ray::Ray, hit)
 end
 
 immutable Diffuse
-
+	texture::Texture
+	Diffuse(t) = new(t)
 end
 
+function emit(d::Diffuse, u::Float64, v::Float64, p::Vec3)
+	value(d.texture)
 end
 
+immutable Isotropic
+	albedo::Texture
+	Isotropic(a) = new(a)
+end
+
+function scatter(i::Isotropic, ray::Ray, hit)
+	true, Ray(hit.p, random_in_unit_sphere()), value(i.albedo, hit.u, hit.v, hit.p)
+end
+
+
+end

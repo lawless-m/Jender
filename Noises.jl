@@ -4,31 +4,21 @@ using Vecs
 
 export Noises, Perlin, turbulence
 
-abstract Noises
+abstract Noise
 
-
-immutable Perlin <: Noises
+immutable Perlin <: Noise
 	random::Vector{Vec3}
-	perm_x::Int
-	perm_y::Int
-	perm_z::Int
+	perm_x::Vector{Int}
+	perm_y::Vector{Int}
+	perm_z::Vector{Int}
 	
 	Perlin(r, x, y, z) = new(r, x, y, z)
-	function Perlin()			
-		function permute(p::Vector{Int})
-			for i in size(p)[1]:-1:2
-				k = 1+floor(Int, (i+1)*rand())
-				p[i], p[k] = p[k], p[i]
-			end
-			p
+	function Perlin()		
+		v = Vector{Vec3}(256)
+		for i in 1:256
+			v[i] = unitVector(-1 + 2rand(), -1 + 2rand(), -1 + 2rand())
 		end
-		new(
-			[unitVector(Vec3(-1 + 2rand(), -1 + 2rand(), -1 + 2rand())) for i in 1:256]
-			, permute([0:255])
-			, permute([0:255])
-			, permute([0:255])
-		)
-	
+		new(v, shuffle!([0:255]), shuffle!([0:255]), shuffle!([0:255]))
 	end
 end
 

@@ -244,6 +244,66 @@ function hitEntity!(last_hit::Hit, r::YZ_Rect, ray::Ray, t_min::Float64)
 	last_hit.normal = Vec3(1,0,0)
 end
 
-
-
+immutable FlippedNormal <: Entity
+	entity::Entity
+	FlippedNormal(e) = new(e)
 end
+
+function hitEntity!(last_hit::Hit, e::FlippedNormal, ray::Ray, t_min::Float64)
+	t = list_hit.t
+	hitEntity!(last_hit, e.entity, ray, t_min)
+	if last_hit.t < t
+		last_hit.normal = -last_hit.normal
+	end
+end
+
+function bounding_box(e::FlippedNormal, t0::Float64, t1::Float64)
+	bounding_box(e.entity, t0, t1)
+end
+
+immutable Translated <: Entity
+	entity::Entity
+	offset::Vec3
+	Translated(e, o) = new(e, o)
+end
+
+function hitEntity!(last_hit::Hit, e::Translated, ray::Ray, t_min::Float64)
+	t = list_hit.t
+	hitEntity!(last_hit, e.entity, ray, t_min)
+	if last_hit.t < t
+		last_hit.p += e.offset
+	end
+end
+
+function bounding_box(e::Translated, t0::Float64, t1::Float64)
+	bbox = bounding_box(e.entity, t0, t1)
+	Aabb(box.min + e.offset, box.max + e.offset)
+end
+
+immutable yRotated <: Entity
+	entity::Entity
+	sin_theta::Float64
+	cos_theta::Float64
+	hasbox::Bool
+	bbox::Aabb
+	function yRotated(e::Entity, angle::Float64)
+		rads = angle * pi / 180
+		sin_theta = sin(rads)
+		cos_theta = cos(rads)
+		bbox = bounding_box(e, 0, 1)
+		mn = [Inf, Inf, Inf]
+		mx = [-Inf, -Inf, -Inf]
+		for i in 0:1, j in 0:1, k in 0:1
+			x = i * bbox.max.x + (1-i) * bbox.min.x
+			y = j * bbox.max.y + (1-j) * bbox.min.y
+			z = k * bbox.max.z + (1-k) * bbox.min.z
+			newx = cos_theta * x + sin_theta * z
+			newz = -sin_theta * x + cos_theta * z
+			test = [newx, y, newz]
+			for c in 1:3
+				mx[c] = max(mx[c], test[c])
+				mn[c] = min(mn[c], test[c])
+			end
+		end
+		new(e, sin_theta, cos_theta, true, Aabb(mn, mx))
+	end

@@ -43,10 +43,10 @@ immutable Vec3
 	y::Float64
 	z::Float64
 	Vec3() = new(0.0, 0.0, 0.0)
-	Vec3(rgb::RGB) = new(rgb.r, rgb.g, rgb.b)
 	Vec3(x, y, z) = new(x, y, z)
-	Vec3(v::Vector) = new(v[1], v[2], v[3])
 	Vec3(v::Vec3) = new(v.x, v.y, v.z)
+	Vec3(v::Vector) = new(v[1], v[2], v[3])
+	Vec3(rgb::RGB) = new(rgb.r, rgb.g, rgb.b)
 end
 
 

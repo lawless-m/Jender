@@ -9,6 +9,8 @@ export Aabb, surrounding_box, hit
 immutable Aabb
 	min::Vec3
 	max::Vec3
+	Aabb(mn::Vec3, mx::Vec3) = new(mn, mx)
+	Aabb(mn::Vector, mx::Vector) = new(Vec3(mn), Vec3(mx))
 end
 
 function mn_mx(mn, mx, r)

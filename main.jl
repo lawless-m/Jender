@@ -33,22 +33,6 @@ function walkPixels(w::Int, h::Int)
 	end
 end
 
-function push_random_entities!(entities::Vector{Entity})
-	for a in -11:10, b in -11:10
-		choose_mat = rand()
-		center = Vec3(a + 0.9rand(), 0.2, b + 0.9rand())
-		if length(center - Vec3(4.0, 0.2, 0.0)) > 0.9
-			if choose_mat < 0.8
-				push!(entities, MovingSphere(center, center+Vec3(0, 0.5*rand(), 0), 0.0, 1.0, 0.2, Lambertian(rand()*rand(), rand()*rand(), rand()*rand())))
-			elseif choose_mat < 0.95
-				push!(entities, Sphere(center, 0.2, Metal(0.5(1+rand()), 0.5(1+rand()), 0.5(1+rand()), 0.5rand())))
-			else
-				push!(entities, Sphere(center, 0.2, Dielectric(1.5)))
-			end
-		end
-	end
-end
-
 function writepgm(pipeline, w, h, filename)
 	pgm = open(filename * ".pgm", "w")
 	@printf pgm "P3\n%d %d 255\n" w h
@@ -99,6 +83,28 @@ function random_spheres()
 	end
 end
 
+function two_perlin_spheres()
+	println("2 Perlin Spheres")
+	pushEntity!(Sphere(0,-1000,0, 1000, Lambertian(Noise(4))))
+	pushEntity!(Sphere(0,2,0, 2, Lambertian(Noise(4))))
+end
+
+function cornell_box()
+	red = Lambertian(Constant(0.65, 0.05, 0.05))
+	white = Lambertian(Constant(0.73))
+	green = Lambertian(Constant(0.12, 0.45, 0.15))
+	light = Diffuse(Constant(15))
+
+	pushEntity!(FlippedNormal(YZ_Rect(0, 555, 0, 555, 555, green)))
+	pushEntity!(YZ_Rect(0, 555, 0, 555, 555, red))
+	pushEntity!(XZ_Rect(213, 343, 227, 332, 554, light))
+	pushEntity!(FlippedNormal(XZ_Rect(0, 555, 0, 555, 555, white)))
+	pushEntity!(XZ_Rect(0, 555, 0, 555, 555, white))
+	pushEntity!(FlippedNormal(XY_Rect(0, 555, 0, 555, 555, white)))
+	pushEntity!(Translated(yRotated(Box(Vec3(0), Vec3(165), white), -18), Vec3(130,0,65)))
+	pushEntity!(Translated(yRotated(Box(Vec3(0), Vec3(165,330,165), white), 15), Vec3(265,0,295)))
+end
+	
 pushCamera!(Camera(Vec3(13,2,3), Vec3(0,0,0), Vec3(0,1,0), 20.0, 3/2, 0.1, 10.0, 0.0, 1.0))
 
 simple_light()

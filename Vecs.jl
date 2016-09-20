@@ -2,35 +2,40 @@ module Vecs
 
 export Vec3, RGB, unitVector, Vec3rand, squaredLength
 
-type RGB
+immutable RGB
 	r::Float64
 	g::Float64
 	b::Float64
-	RGB() = new(0.0, 0.0, 0.0)
-end
-
-function zero(rgb::RGB)
-	rgb.r = 0
-	rgb.g = 0
-	rgb.b = 0
+	RGB(grey) = new(grey, grey, grey)
+	RGB() = new(0.0)
+	RGB(r,g,b) = new(r, g, b)
 end
 
 function Base.:/(v::RGB, f::Real)
-	v.r /= f
-	v.g /= f
-	v.b /= f
+	RGB(v.r / f, v.g/f, v.b/f)
 end
 
 function Base.:+(v::RGB, f::Real)
-	v.r += f
-	v.g += f
-	v.b += f
+	RGB(v.r+f, v.g+f, v.b+f)
 end
 
 function Base.:+(a::RGB, b::RGB)
-	a.r += b.r
-	a.g += b.g
-	a.b += b.b
+	RGB(a.r+b.r, a.g+b.g, a.b+b.b)
+end
+function Base.:*(a::RGB, b::RGB)
+	RGB(a.r*b.r, a.g*b.g, a.b*b.b)
+end
+
+function Base.:*(a::RGB, f::Float64)
+	RGB(a.r*f, a.g*f, a.b*f)
+end
+
+macro bit8(v)
+	:(floor(Int,255.99*sqrt($v)))
+end
+	
+function string(rgb::RGB)
+	@sprintf "%d %d %d " @bit8(pixel.r) @bit8(pixel.g) @bit8(pixel.b)
 end
 
 immutable Vec3

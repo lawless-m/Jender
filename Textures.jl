@@ -8,12 +8,12 @@ export Texture, Constant, Checker, Noise, Image, value
 abstract Texture
 
 immutable Constant <: Texture
-	color::Vec3
-	Constant(rgb) = new(Vec3(rgb, rgb, rgb))
-	Constant(r, g, b) = new(Vec3(r, g, b))
+	color::RGB
+	Constant(rgb) = new(RGB(rgb, rgb, rgb))
+	Constant(r, g, b) = new(RGB(r, g, b))
 end
 
-function value(c::Constant, u::Float64, v::Float64)
+function value(c::Constant, p::Vec3, u::Float64, v::Float64)
 	c.color
 end
 
@@ -38,11 +38,12 @@ immutable Noise <: Texture
 end
 
 function value(n::Noise, p::Vec3, u::Float64, v::Float64)
-	Vec3(1) * 0.5(1 + sin(n.scale*p.x + 5turbulence(n.noise, n.scale*p)))
+	RGB(0.5(1 + sin(n.scale*p.x + 5turbulence(n.noise, n.scale*p))))
 end
 
 immutable Image <: Texture
-	rgb::Matrix{Vec3}
+	rgb::Matrix{RGB}
+	Image(w, h) = new(Matrix{RGB}(w, h))
 end
 
 function value(img::Image, p::Vec3, u::Float64, v::Float64)

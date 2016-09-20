@@ -13,8 +13,8 @@ using Rays
 using Cameras
 using Textures
 
-function renderPixel(i::Int, j::Int, w::Int, h::Int, numsamples::Int)
-	c = Float64[0,0,0] 
+function pixelProducer(i::Int, j::Int, w::Int, h::Int, numsamples::Int)
+	c = RGB()
 	for s in 1:numsamples
 		c += rayColor(shootRay(WORLD.cameras[1], (i-1 + rand()) / w, (j-1 + rand()) / h), 0)
 	end
@@ -50,14 +50,12 @@ function push_random_entities!(entities::Vector{Entity})
 end
 
 function writepgm(pipeline, w, h, filename)
-	f(v::Float64) = floor(Int,255.99*sqrt(v))
 	pgm = open(filename * ".pgm", "w")
 	@printf pgm "P3\n%d %d 255\n" w h
 	for j in 1:h
 		println("Row $(h-j)")
 		for i in 1:w
-			pixel = consume(pipeline)
-			@printf pgm "%d %d %d " f(pixel[1]) f(pixel[2]) f(pixel[3])
+			write(string(consume(pipeline)))
 		end
 		@printf pgm "\n"
 	end
@@ -126,7 +124,7 @@ function walk()
 	walkPixels(w, h)
 end	
 
-walk()
+small()
 
 
 

@@ -14,11 +14,11 @@ immutable Perlin <: Noise
 	
 	Perlin(r, x, y, z) = new(r, x, y, z)
 	function Perlin()		
-		v = Vector{Vec3}(256)
+		r = Vector{Vec3}(256)
 		for i in 1:256
-			v[i] = unitVector(-1 + 2rand(), -1 + 2rand(), -1 + 2rand())
+			r[i] = unitVector(-1 + 2rand(), -1 + 2rand(), -1 + 2rand())
 		end
-		new(v, shuffle!([0:255]), shuffle!([0:255]), shuffle!([0:255]))
+		new(r, shuffle!([i for i in 0:255]), shuffle!([i for i in 0:255]), shuffle!([i for i in 0:255]))
 	end
 end
 
@@ -28,7 +28,7 @@ function interpolate(c::Array{Vec3}, u::Float64, v::Float64, w::Float64)
 	ww = w^2 * (3-2w)
 	accum = 0.0
 	for i in 0:1, j in 0:1, k in 0:1
-		accum += (iuu + (1-i)*(1-uu)) * (j*vv + (1-j)*(1-vv)) * (k*ww + (1-k)*(1-ww)) * dot(c[i+1][k+1][k+1], Vec3(u-i, v-j, w-k))
+		accum += (i*uu + (1-i)*(1-uu)) * (j*vv + (1-j)*(1-vv)) * (k*ww + (1-k)*(1-ww)) * dot(c[i+1, k+1, k+1], Vec3(u-i, v-j, w-k))
 	end 
 	accum
 end
@@ -53,8 +53,9 @@ function noise(n::Perlin, p::Vec3)
 	v = p.y - j
 	w = p.z - k
 	c = Array{Vec3}(2,2,2)
-	for di in 0:1, dj in 0:1, dk in 0:1
-		c[di, dj, dk] = n.ranvec[n.perm_x[((i+di)&255)+1] $ n.perm_y[((j+dj)&255)+1] $ n.perm_z[((k+dk)&255)+1]]
+	for di in 1:2, dj in 1:2, dk in 1:2
+		ri = n.perm_x[((i+di-1)&255)+1] $ n.perm_y[((j+dj-1)&255)+1] $ n.perm_z[((k+dk-1)&255)+1]
+		c[di, dj, dk] = n.random[ri+1]
 	end
 	interpolate(c, u, v, w)
 end

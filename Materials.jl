@@ -4,7 +4,7 @@ using Vecs
 using Rays
 using Textures
 
-export scatter, reflect, refract, emit, Diffuse, Lambertian, Metal, Dielectric, Isotropic, Diffuse
+export scatter, reflect, refract, emit, Material, Diffuse, Lambertian, Metal, Dielectric, Isotropic, Diffuse
 
 function schlick(cosine::Float64, ref_idx::Float64)
 	r0 = ((1 - ref_idx) / (1 + ref_idx))^2
@@ -38,7 +38,7 @@ immutable Null <: Material
 end
 
 function emit(m::Material, u::Float64, v::Float64, p::Vec3)
-	return Float64[0,0,0]
+	return RGB(0)
 end
 
 function scatter(m::Material, ray::Ray, hit)
@@ -53,13 +53,14 @@ end
 
 function scatter(m::Lambertian, ray::Ray, hit)
 	target = hit.p + hit.normal + random_in_unit_sphere()
-	true, Ray(hit.p, target - hit.p, ray.time), m.albedo
+	true, Ray(hit.p, target - hit.p, ray.time), value(m.albedo, hit.p, hit.u, hit.v)
 end
 
 immutable Metal <: Material
-	albedo::Vector{Float64}
+	albedo::RGB
 	fuzz::Float64
-	Metal(r, g, b, f) = new(Float64[r, g, b], f<1 ? f : 1)
+	Metal(rgb, f) = new(rgb, f<1 ? f : 1)
+	Metal(r, g, b, f) = new(RGB(r, g, b), f)
 end
 
 function scatter(m::Metal, ray::Ray, hit)
@@ -92,19 +93,19 @@ function scatter(m::Dielectric, ray::Ray, hit)
 	
 	refraction = refract(ray.direction, outward_normal, ni_over_nt)
 	reflect_prob = refraction == nothing ? 1.0 : schlick(cosine, m.ref_idx)
-	true, Ray(hit.p, rand() < reflect_prob ? reflection : refraction, ray.time), [1.0, 1.0, 1.0]
+	true, Ray(hit.p, rand() < reflect_prob ? reflection : refraction, ray.time), RGB(1)
 end
 
-immutable Diffuse
+immutable Diffuse <: Material
 	texture::Texture
 	Diffuse(t) = new(t)
 end
 
 function emit(d::Diffuse, u::Float64, v::Float64, p::Vec3)
-	value(d.texture)
+	value(d.texture, p, u, v)
 end
 
-immutable Isotropic
+immutable Isotropic <: Material
 	albedo::Texture
 	Isotropic(a) = new(a)
 end
@@ -112,6 +113,5 @@ end
 function scatter(i::Isotropic, ray::Ray, hit)
 	true, Ray(hit.p, random_in_unit_sphere()), value(i.albedo, hit.u, hit.v, hit.p)
 end
-
 
 end

@@ -50,7 +50,9 @@ immutable Sphere <: Entity
 	radius::Float64
 	radius_sq::Float64
 	material::Material
-	Sphere(x, y, z, r, m) = new(Vec3(x, y, z), r, r^2, m)
+	bbox::Aabb
+	Sphere(c, r, m) = new(c, r, r^2, m, Aabb(s.center - Vec3(s.radius), s.center + Vec3(s.radius));)
+	Sphere(x, y, z, r, m) = new(Vec3(x, y, z), r, m)
 	Sphere(xyz, r, m) = new(xyz, r, r^2, m)
 end
 
@@ -78,7 +80,7 @@ function hitEntity!(hit::Hit, s::Sphere, ray::Ray, t_min::Float64)
 end
 
 function bounding_box(s::Sphere, t0::Float64, t1::Float64)
-    Aabb(s.center - Vec3(s.radius), s.center + Vec3(s.radius));
+    s.bbox
 end
 
 immutable MovingSphere <: Entity
@@ -132,11 +134,12 @@ immutable XY_Rect <: Entity
 	y1::Float64
 	k::Float64
 	material::Material
-	XY_Rect(x0, y0, x1, y1, k, m) = new(x0, y0, x1, y1, k, m)
+	bbox::Aabb
+	XY_Rect(x0, y0, x1, y1, k, m) = new(x0, y0, x1, y1, k, m, Aabb(Vec3(r.x0, r.y0, r.k-0.0001), Vec3(r.x1, r.y1, k+0.0001)))
 end
 
 function bounding_box(r::XY_Rect, t0::Float64, t1::Float64)
-	Aabb(Vec3(r.x0, r.y0, r.k-0.0001), Vec3(r.x1, r.y1, k+0.0001))
+	r.bbox
 end
 
 function hitEntity!(hit::Hit, r::XY_Rect, ray::Ray, t_min::Float64)
@@ -170,11 +173,12 @@ immutable XZ_Rect <: Entity
 	z1::Float64
 	k::Float64
 	material::Material
-	XZ_Rect(x0, z0, x1, z1, k, m) = new(x0, z0, x1, z1, k, m)
+	bbox::Aabb
+	XZ_Rect(x0, z0, x1, z1, k, m) = new(x0, z0, x1, z1, k, m, Aabb(Vec3(r.x0, r.k-0.000, r.z0), Vec3(r.x1, k+0.0001, r.z1)))
 end
 
 function bounding_box(r::XZ_Rect, t0::Float64, t1::Float64)
-	Aabb(Vec3(r.x0, r.k-0.000, r.z0), Vec3(r.x1, k+0.0001, r.z1))
+	r.bbox
 end
 
 function hitEntity!(hit::Hit, r::XZ_Rect, ray::Ray, t_min::Float64)
@@ -209,11 +213,12 @@ immutable YZ_Rect <: Entity
 	z1::Float64
 	k::Float64
 	material::Material
-	YZ_Rect(y0, z0, y1, z1, k, m) = new(y0, z0, y1, z1, k, m)
+	bbox::Aabb
+	YZ_Rect(y0, z0, y1, z1, k, m) = new(y0, z0, y1, z1, k, m, Aabb(Vec3(r.k-0.000, r.y0, r.z0), Vec3(k+0.0001, r.y1, r.z1)))
 end
 
 function bounding_box(r::YZ_Rect, t0::Float64, t1::Float64)
-	Aabb(Vec3(r.k-0.000, r.y0, r.z0), Vec3(k+0.0001, r.y1, r.z1))
+	r.bbox
 end
 
 function hitEntity!(hit::Hit, r::YZ_Rect, ray::Ray, t_min::Float64)

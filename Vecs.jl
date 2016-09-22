@@ -1,6 +1,6 @@
 module Vecs
 
-export Vec3, RGB, unitVector, Vec3rand, squaredLength
+export Vec3, RGB, unitVector, Vec3rand, squaredLength, pgmize
 
 immutable RGB
 	r::Float64
@@ -34,8 +34,8 @@ macro bit8(v)
 	:(floor(Int,255.99*sqrt($v)))
 end
 	
-function string(rgb::RGB)
-	@sprintf "%d %d %d " @bit8(pixel.r) @bit8(pixel.g) @bit8(pixel.b)
+function pgmize(rgb::RGB)
+	@sprintf "%d %d %d " @bit8(rgb.r) @bit8(rgb.g) @bit8(rgb.b)
 end
 
 immutable Vec3
@@ -49,7 +49,6 @@ immutable Vec3
 	Vec3(v::Vector) = new(v[1], v[2], v[3])
 	Vec3(rgb::RGB) = new(rgb.r, rgb.g, rgb.b)
 end
-
 
 function Base.:*(v::Vec3, f::Float64)
 	Vec3(v.x*f, v.y*f, v.z*f)

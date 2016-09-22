@@ -36,10 +36,11 @@ end
 function writepgm(pipeline, w, h, filename)
 	pgm = open(filename * ".pgm", "w")
 	@printf pgm "P3\n%d %d 255\n" w h
+	
 	for j in 1:h
 		println("Row $(h-j)")
 		for i in 1:w
-			write(string(consume(pipeline)))
+			write(pgm, pgmize(consume(pipeline)))
 		end
 		@printf pgm "\n"
 	end

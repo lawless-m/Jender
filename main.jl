@@ -101,13 +101,13 @@ function cornell_box()
 	pushEntity!(FlippedNormal(XZ_Rect(0, 555, 0, 555, 555, white)))
 	pushEntity!(XZ_Rect(0, 555, 0, 555, 555, white))
 	pushEntity!(FlippedNormal(XY_Rect(0, 555, 0, 555, 555, white)))
-	pushEntity!(Translated(yRotated(Box(Vec3(0), Vec3(165), white), -18), Vec3(130,0,65)))
-	pushEntity!(Translated(yRotated(Box(Vec3(0), Vec3(165,330,165), white), 15), Vec3(265,0,295)))
+	pushEntity!(Translated(yRotated(Box(Vec3(0), Vec3(165), white), -18.0), Vec3(130,0,65)))
+	pushEntity!(Translated(yRotated(Box(Vec3(0), Vec3(165,330,165), white), 15.0), Vec3(265,0,295)))
 end
 	
 pushCamera!(Camera(Vec3(13,2,3), Vec3(0,0,0), Vec3(0,1,0), 20.0, 3/2, 0.1, 10.0, 0.0, 1.0))
 
-simple_light()
+cornell_box()
 
 function best()
 	w, h = 400ASPECTW, 400ASPECTH # like this so the aspect ratio is obvious

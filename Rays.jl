@@ -21,13 +21,14 @@ function pointRayAt(r::Ray, t::Float64)
 end
 
 function rayColor(r::Ray, depth::Int)
-	h = hitWorld(WORLD, r, 0.001, Inf)
-	if h == nothing
+	hit = Hit()
+	hitEntity!(hit, WORLD.entities, r, 0.001)
+	if hit.t == Inf
 		return RGB(0.0)
 	end
-	emission = emit(h.material, h.u, h.v, h.p)
+	emission = emit(hit.material, hit.u, hit.v, hit.p)
 	if depth < 50
-		onscreen, scattered, attenuation = scatter(h.material, r, h)
+		onscreen, scattered, attenuation = scatter(hit.material, r, hit)
 		if onscreen
 			return emission + attenuation * rayColor(scattered, depth+1)
 		end

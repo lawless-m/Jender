@@ -6,7 +6,7 @@ using Rays
 using Cameras
 using Aabbs
 
-export WORLD, World, Entity, Sphere, XY_Rect, XZ_Rect, YZ_Rect, MovingSphere, hitWorld, hitEntity!, pushEntity!, push_random_entities!, pushCamera!
+export WORLD, World, Entity, Hit, Sphere, XY_Rect, XZ_Rect, YZ_Rect, FlippedNormal, yRotated, Translated, MovingSphere, Box, hitWorld, hitEntity!, pushEntity!, push_random_entities!, pushCamera!
 
 type Hit
 	t::Float64
@@ -16,6 +16,7 @@ type Hit
 	normal::Vec3
 	material::Material
 	Hit(t_max) = new(t_max, 0, 0, Vec3(), Vec3(), Materials.Null())
+	Hit() = Hit(Inf)
 end
 
 abstract Entity
@@ -38,14 +39,9 @@ function pushCamera!(c::Camera)
 	push!(WORLD.cameras, c)
 end
 
-
-function hitWorld(world::World, ray::Ray, t_min::Float64, t_max::Float64)
-	last_hit = Hit(t_max)
-	for entity in world.entities
-		hitEntity!(last_hit, entity, ray, t_min)
-	end
-	if last_hit.t < t_max
-		return last_hit
+function hitEntity!(hit::Hit, entities::Vector{Entity}, ray::Ray, t_min::Float64)
+	for entity in entities
+		hitEntity!(hit, entity, ray, t_min)
 	end
 end
 
@@ -58,7 +54,7 @@ immutable Sphere <: Entity
 	Sphere(xyz, r, m) = new(xyz, r, r^2, m)
 end
 
-function hitEntity!(last_hit::Hit, s::Sphere, ray::Ray, t_min::Float64)
+function hitEntity!(hit::Hit, s::Sphere, ray::Ray, t_min::Float64)
 	oc = ray.origin - s.center
 	b = dot(oc, ray.direction)
 	c = dot(oc, oc) - s.radius_sq
@@ -66,18 +62,18 @@ function hitEntity!(last_hit::Hit, s::Sphere, ray::Ray, t_min::Float64)
 		return
 	end
 	sd = sqrt(b^2 - ray.dot * c) # sqrt discriminant
-	tmx = last_hit.t * ray.dot + b
+	tmx = hit.t * ray.dot + b
 	tmn = t_min * ray.dot + b
 	if -sd < tmx &&  -sd > tmn
-		last_hit.t = (-b - sd) / ray.dot
-		last_hit.p = pointRayAt(ray, last_hit.t)
-		last_hit.normal = (last_hit.p - s.center) / s.radius
-		last_hit.material = s.material
+		hit.t = (-b - sd) / ray.dot
+		hit.p = pointRayAt(ray, hit.t)
+		hit.normal = (hit.p - s.center) / s.radius
+		hit.material = s.material
 	elseif sd < tmx && sd > tmn
-		last_hit.t = (-b + sd) / ray.dot
-		last_hit.p = pointRayAt(ray, last_hit.t)
-		last_hit.normal = (last_hit.p - s.center) / s.radius
-		last_hit.material = s.material
+		hit.t = (-b + sd) / ray.dot
+		hit.p = pointRayAt(ray, hit.t)
+		hit.normal = (hit.p - s.center) / s.radius
+		hit.material = s.material
 	end
 end
 
@@ -97,7 +93,7 @@ immutable MovingSphere <: Entity
 	MovingSphere(xyz0, xyz1, t0, t1, r, m) = new(xyz0, xyz1, t0, t1, r, r^2, m)
 end
 
-function hitEntity!(last_hit::Hit, s::MovingSphere, ray::Ray, t_min::Float64)
+function hitEntity!(hit::Hit, s::MovingSphere, ray::Ray, t_min::Float64)
 	senter = center(s, ray.time)
 	oc = ray.origin - senter
 	b = dot(oc, ray.direction)
@@ -106,18 +102,18 @@ function hitEntity!(last_hit::Hit, s::MovingSphere, ray::Ray, t_min::Float64)
 		return
 	end
 	sd = sqrt(b^2 - ray.dot * c) # sqrt discriminant
-	tmx = last_hit.t * ray.dot + b
+	tmx = hit.t * ray.dot + b
 	tmn = t_min * ray.dot + b
 	if -sd < tmx &&  -sd > tmn
-		last_hit.t = (-b - sd) / ray.dot
-		last_hit.p = pointRayAt(ray, last_hit.t)
-		last_hit.normal = (last_hit.p - senter) / s.radius
-		last_hit.material = s.material
+		hit.t = (-b - sd) / ray.dot
+		hit.p = pointRayAt(ray, hit.t)
+		hit.normal = (hit.p - senter) / s.radius
+		hit.material = s.material
 	elseif sd < tmx && sd > tmn
-		last_hit.t = (-b + sd) / ray.dot
-		last_hit.p = pointRayAt(ray, last_hit.t)
-		last_hit.normal = (last_hit.p - senter) / s.radius
-		last_hit.material = s.material
+		hit.t = (-b + sd) / ray.dot
+		hit.p = pointRayAt(ray, hit.t)
+		hit.normal = (hit.p - senter) / s.radius
+		hit.material = s.material
 	end
 end
 
@@ -143,9 +139,9 @@ function bounding_box(r::XY_Rect, t0::Float64, t1::Float64)
 	Aabb(Vec3(r.x0, r.y0, r.k-0.0001), Vec3(r.x1, r.y1, k+0.0001))
 end
 
-function hitEntity!(last_hit::Hit, r::XY_Rect, ray::Ray, t_min::Float64)
+function hitEntity!(hit::Hit, r::XY_Rect, ray::Ray, t_min::Float64)
 	t = (r.k - ray.origin.z) / ray.direction.z
-	if t < t_min || t > last_hit.t
+	if t < t_min || t > hit.t
 		return
 	end
 	
@@ -159,12 +155,12 @@ function hitEntity!(last_hit::Hit, r::XY_Rect, ray::Ray, t_min::Float64)
 		return
 	end
 	
-	last_hit.u = (x - r.x0) / (r.x1 - r.x0)
-	last_hit.v = (y - r.y0) / (r.y1 - r.y0)
-	last_hit.t = t
-	last_hit.material = r.material
-	last_hit.p = pointRayAt(ray, t)
-	last_hit.normal = Vec3(0,0,1)
+	hit.u = (x - r.x0) / (r.x1 - r.x0)
+	hit.v = (y - r.y0) / (r.y1 - r.y0)
+	hit.t = t
+	hit.material = r.material
+	hit.p = pointRayAt(ray, t)
+	hit.normal = Vec3(0,0,1)
 end
 
 immutable XZ_Rect <: Entity
@@ -181,9 +177,9 @@ function bounding_box(r::XZ_Rect, t0::Float64, t1::Float64)
 	Aabb(Vec3(r.x0, r.k-0.000, r.z0), Vec3(r.x1, k+0.0001, r.z1))
 end
 
-function hitEntity!(last_hit::Hit, r::XZ_Rect, ray::Ray, t_min::Float64)
+function hitEntity!(hit::Hit, r::XZ_Rect, ray::Ray, t_min::Float64)
 	t = (r.k - ray.origin.y) / ray.direction.y
-	if t < t_min || t > last_hit.t
+	if t < t_min || t > hit.t
 		return
 	end
 	
@@ -197,12 +193,12 @@ function hitEntity!(last_hit::Hit, r::XZ_Rect, ray::Ray, t_min::Float64)
 		return
 	end
 	
-	last_hit.u = (x - r.x0) / (r.x1 - r.x0)
-	last_hit.v = (z - r.z0) / (r.z1 - r.z0)
-	last_hit.t = t
-	last_hit.material = r.material
-	last_hit.p = pointRayAt(ray, t)
-	last_hit.normal = Vec3(0,1,0)
+	hit.u = (x - r.x0) / (r.x1 - r.x0)
+	hit.v = (z - r.z0) / (r.z1 - r.z0)
+	hit.t = t
+	hit.material = r.material
+	hit.p = pointRayAt(ray, t)
+	hit.normal = Vec3(0,1,0)
 end
 
 
@@ -220,9 +216,9 @@ function bounding_box(r::YZ_Rect, t0::Float64, t1::Float64)
 	Aabb(Vec3(r.k-0.000, r.y0, r.z0), Vec3(k+0.0001, r.y1, r.z1))
 end
 
-function hitEntity!(last_hit::Hit, r::YZ_Rect, ray::Ray, t_min::Float64)
+function hitEntity!(hit::Hit, r::YZ_Rect, ray::Ray, t_min::Float64)
 	t = (r.k - ray.origin.x) / ray.direction.x
-	if t < t_min || t > last_hit.t
+	if t < t_min || t > hit.t
 		return
 	end
 	
@@ -236,12 +232,12 @@ function hitEntity!(last_hit::Hit, r::YZ_Rect, ray::Ray, t_min::Float64)
 		return
 	end
 	
-	last_hit.u = (y - r.y0) / (r.y1 - r.y0)
-	last_hit.v = (z - r.z0) / (r.z1 - r.z0)
-	last_hit.t = t
-	last_hit.material = r.material
-	last_hit.p = pointRayAt(ray, t)
-	last_hit.normal = Vec3(1,0,0)
+	hit.u = (y - r.y0) / (r.y1 - r.y0)
+	hit.v = (z - r.z0) / (r.z1 - r.z0)
+	hit.t = t
+	hit.material = r.material
+	hit.p = pointRayAt(ray, t)
+	hit.normal = Vec3(1,0,0)
 end
 
 immutable FlippedNormal <: Entity
@@ -249,11 +245,11 @@ immutable FlippedNormal <: Entity
 	FlippedNormal(e) = new(e)
 end
 
-function hitEntity!(last_hit::Hit, e::FlippedNormal, ray::Ray, t_min::Float64)
-	t = list_hit.t
-	hitEntity!(last_hit, e.entity, ray, t_min)
-	if last_hit.t < t
-		last_hit.normal = -last_hit.normal
+function hitEntity!(hit::Hit, e::FlippedNormal, ray::Ray, t_min::Float64)
+	t = hit.t
+	hitEntity!(hit, e.entity, ray, t_min)
+	if hit.t < t
+		hit.normal = -hit.normal
 	end
 end
 
@@ -267,11 +263,11 @@ immutable Translated <: Entity
 	Translated(e, o) = new(e, o)
 end
 
-function hitEntity!(last_hit::Hit, e::Translated, ray::Ray, t_min::Float64)
-	t = list_hit.t
-	hitEntity!(last_hit, e.entity, ray, t_min)
-	if last_hit.t < t
-		last_hit.p += e.offset
+function hitEntity!(hit::Hit, e::Translated, ray::Ray, t_min::Float64)
+	t = hit.t
+	hitEntity!(hit, e.entity, ray, t_min)
+	if hit.t < t
+		hit.p += e.offset
 	end
 end
 
@@ -290,7 +286,7 @@ immutable yRotated <: Entity
 		rads = angle * pi / 180
 		sin_theta = sin(rads)
 		cos_theta = cos(rads)
-		bbox = bounding_box(e, 0, 1)
+		bbox = bounding_box(e, 0.0, 1.0)
 		mn = [Inf, Inf, Inf]
 		mx = [-Inf, -Inf, -Inf]
 		for i in 0:1, j in 0:1, k in 0:1
@@ -307,3 +303,58 @@ immutable yRotated <: Entity
 		end
 		new(e, sin_theta, cos_theta, true, Aabb(mn, mx))
 	end
+end
+
+function hitEntity!(hit::Hit, e::yRotated, ray::Ray, t_min::Float64)
+	rotated = Ray(Vec3(e.cos_theta * ray.origin.x - e.sin_theta * ray.origin.z, ray.origin.y, e.sin_theta * ray.origin.x + e.cos_theta * ray.origin.z), Vec3(e.cos_theta * ray.direction.x - e.sin_theta * ray.direction.z, ray.direction.y, e.sin_theta * ray.direction.x + e.cos_theta * ray.direction.z), ray.time)
+	t = hit.t
+	hitEntity!(hit, e.entity, rotated, t_min)
+	if hit.t < t
+		hit.p = Vec3(e.cos_theta * hit.p.x + e.sin_theta * hit.p.z, hit.p.y, -e.sin_theta * hit.p.x + e.sin_theta * hit.p.z)
+		hit.normal = Vec3(e.cos_theta * hit.normal.x + e.sin_theta * hit.normal.z, hit.normal.y, -e.sin_theta * hit.normal.x + e.sin_theta * hit.normal.z)
+	end
+end
+
+immutable Box <: Entity
+	pmin::Vec3
+	pmax::Vec3
+	entities::Vector{Entity}
+	function Box(p0::Vec3, p1::Vec3, m::Material)
+		e = Vector{Entity}()
+		push!(e, XY_Rect(p0.x, p1.x, p0.y, p1.y, p1.z, m))
+		push!(e, FlippedNormal(XY_Rect(p0.x, p1.x, p0.y, p1.y, p0.z, m)))
+		push!(e, XZ_Rect(p0.x, p1.x, p0.z, p1.z, p1.y, m))
+		push!(e, FlippedNormal(XZ_Rect(p0.x, p1.x, p0.z, p1.z, p0.y, m)))
+		push!(e, YZ_Rect(p0.y, p1.y, p0.z, p1.z, p1.x, m))
+		push!(e, FlippedNormal(YZ_Rect(p0.y, p1.y, p0.z, p1.z, p0.x, m)))
+		new(p0, p1, e)
+	end
+end
+
+function hitEntity!(hit::Hit, b::Box, ray::Ray, t_min::Float64)
+	hitEntity!(hit, b.entities, ray, t_min)
+end
+
+function bounding_box(b::Box, t0::Float64, t1::Float64)
+	Aabb(b.pmin, b.pmax)
+end
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+end

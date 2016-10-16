@@ -1,6 +1,11 @@
 
-cd(ENV["USERPROFILE"] * "/Documents")
-unshift!(LOAD_PATH, "GitHub/Jender/")
+if isdir("R:/Jender")
+	cd("R:/")
+	unshift!(LOAD_PATH, "R:/Jender/")
+else
+	cd(ENV["USERPROFILE"] * "/Documents")
+	unshift!(LOAD_PATH, "GitHub/Jender/")
+end
 
 #=
 TheNextWeek https://github.com/petershirley/raytracingthenextweek/
@@ -49,8 +54,8 @@ end
 
 srand(0)
 const SAMPLES = 10
-const ASPECTW = 3
-const ASPECTH = 2
+const ASPECTW = 1
+const ASPECTH = 1
 		
 function simple_light()
 	println("Simple Light")
@@ -91,6 +96,7 @@ function two_perlin_spheres()
 end
 
 function cornell_box()
+	println("cornell_box")
 	red = Lambertian(Constant(0.65, 0.05, 0.05))
 	white = Lambertian(Constant(0.73))
 	green = Lambertian(Constant(0.12, 0.45, 0.15))
@@ -106,7 +112,7 @@ function cornell_box()
 	pushEntity!(Translated(yRotated(Box(Vec3(0), Vec3(165,330,165), white), 15.0), Vec3(265,0,295)))
 end
 	
-pushCamera!(Camera(Vec3(13,2,3), Vec3(0,0,0), Vec3(0,1,0), 20.0, 3/2, 0.1, 10.0, 0.0, 1.0))
+pushCamera!(Camera(Vec3(278,278,-800), Vec3(278,278,0), Vec3(0,1,0), 40.0, ASPECTW/ASPECTH, 0.0, 10.0, 0.0, 1.0))
 
 cornell_box()
 
@@ -122,7 +128,7 @@ function profiled()
 end
 
 function small()
-	w, h = 50ASPECTW, 50ASPECTH
+	w, h = 800ASPECTW, 800ASPECTH
 	writepgm(Task(()->@time render(w, h, 1)), w, h, "Small1")
 end	
 
@@ -131,7 +137,20 @@ function walk()
 	walkPixels(w, h)
 end	
 
-small()
+function ptest()
+	# i:40 j:778 o:278 278 -800 d:3.26999 3.44724 10 s:0 c:1.314 4.9275 1.6425
+	
+	# i:460 j:668 o:278 278 -800 d:-0.545959 2.4386 10 c:15 15 15
+	
+	i = 460
+	j = 668
+	wh = 800
+	r = shootRay(WORLD.cameras[1], (i-1) / wh , (j-1) / wh)
+	println(r)
+	println(rayColor(r, 0))
+end
+
+ptest()
 
 
 

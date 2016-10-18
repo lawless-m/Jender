@@ -23,6 +23,10 @@ function pixelProducer(i::Int, j::Int, w::Int, h::Int, numsamples::Int)
 	for s in 1:numsamples
 		c += rayColor(shootRay(WORLD.cameras[1], (i-1 + rand()) / w, (j-1 + rand()) / h), 0)
 	end
+	if c.r + c.g + c.b > 0
+		@printf "i:%d j:%d c:%s\n" i j c
+		quit()
+	end
 	produce(c / numsamples)
 end
 
@@ -138,12 +142,13 @@ function walk()
 end	
 
 function ptest()
-	# i:40 j:778 o:278 278 -800 d:3.26999 3.44724 10 s:0 c:1.314 4.9275 1.6425
+
+# i:362 j:642 o:278 278 -800 d:0.345764 2.20203 10
+ # c:4.25974 4.25974 4.25974
+
 	
-	# i:460 j:668 o:278 278 -800 d:-0.545959 2.4386 10 c:15 15 15
-	
-	i = 460
-	j = 668
+	i = 362
+	j = 642
 	wh = 800
 	r = shootRay(WORLD.cameras[1], (i-1) / wh , (j-1) / wh)
 	println(r)

@@ -90,8 +90,7 @@ immutable MovingSphere <: Entity
 	radius::Float64
 	radius_sq::Float64
 	material::Material
-	MovingSphere(x0, y0, z0, x1, y1, z1, t0, t1, r, m) = new(Vec3(x0, y0, z0), Vec3(x1, y1, z1), t0, t1, r, r^2, m)
-	MovingSphere(xyz0, xyz1, t0, t1, r, m) = new(xyz0, xyz1, t0, t1, r, r^2, m)
+	MovingSphere(cen0, cen1, t0, t1, r, m) = new(cen0, cen1, t0, t1, r, r^2, m)
 end
 
 function hitEntity!(hit::Hit, s::MovingSphere, ray::Ray, t_min::Float64)
@@ -128,13 +127,13 @@ end
 
 immutable XY_Rect <: Entity
 	x0::Float64
-	y0::Float64
 	x1::Float64
+	y0::Float64
 	y1::Float64
 	k::Float64
 	material::Material
 	bbox::Aabb
-	XY_Rect(x0, y0, x1, y1, k, m) = new(x0, y0, x1, y1, k, m, Aabb(Vec3(x0, y0, k-0.0001), Vec3(x1, y1, k+0.0001)))
+	XY_Rect(x0, x1, y0, y1, k, m) = new(x0, x1, y0, y1, k, m, Aabb(Vec3(x0, y0, k-0.0001), Vec3(x1, y1, k+0.0001)))
 end
 
 function bounding_box(r::XY_Rect, t0::Float64, t1::Float64)
@@ -167,53 +166,54 @@ end
 
 immutable XZ_Rect <: Entity
 	x0::Float64
-	z0::Float64
 	x1::Float64
+	z0::Float64
 	z1::Float64
 	k::Float64
 	material::Material
 	bbox::Aabb
-	XZ_Rect(x0, z0, x1, z1, k, m) = new(x0, z0, x1, z1, k, m, Aabb(Vec3(x0, k-0.000, z0), Vec3(x1, k+0.0001, z1)))
+	XZ_Rect(x0, x1, z0, z1, k, m) = new(x0, x1, z0, z1, k, m, Aabb(Vec3(x0, k-0.000, z0), Vec3(x1, k+0.0001, z1)))
 end
 
 function bounding_box(r::XZ_Rect, t0::Float64, t1::Float64)
 	r.bbox
 end
 
-function hitEntity!(hit::Hit, r::XZ_Rect, ray::Ray, t_min::Float64)
-	t = (r.k - ray.origin.y) / ray.direction.y
+function hitEntity!(hit::Hit, xz::XZ_Rect, ray::Ray, t_min::Float64)
+	t = (xz.k - ray.origin.y) / ray.direction.y
 	if t < t_min || t > hit.t
 		return
 	end
 	
 	x = ray.origin.x + t * ray.direction.x
-	if x < r.x0 || x > r.x1
+	
+	if x < xz.x0 || x > xz.x1
 		return
 	end
 	
 	z = ray.origin.z + t * ray.direction.z
-	if z < r.z0 || z > r.z1
+	
+	if z < xz.z0 || z > xz.z1
 		return
 	end
 	
-	hit.u = (x - r.x0) / (r.x1 - r.x0)
-	hit.v = (z - r.z0) / (r.z1 - r.z0)
+	hit.u = (x - xz.x0) / (xz.x1 - xz.x0)
+	hit.v = (z - xz.z0) / (xz.z1 - xz.z0)
 	hit.t = t
-	hit.material = r.material
+	hit.material = xz.material
 	hit.p = pointRayAt(ray, t)
 	hit.normal = Vec3(0,1,0)
 end
 
-
 immutable YZ_Rect <: Entity
 	y0::Float64
-	z0::Float64
 	y1::Float64
+	z0::Float64
 	z1::Float64
 	k::Float64
 	material::Material
 	bbox::Aabb
-	YZ_Rect(y0, z0, y1, z1, k, m) = new(y0, z0, y1, z1, k, m, Aabb(Vec3(k-0.000, y0, z0), Vec3(k+0.0001, y1, z1)))
+	YZ_Rect(y0, y1, z0, z1, k, m) = new(y0, y1, z0, z1, k, m, Aabb(Vec3(k-0.000, y0, z0), Vec3(k+0.0001, y1, z1)))
 end
 
 function bounding_box(r::YZ_Rect, t0::Float64, t1::Float64)

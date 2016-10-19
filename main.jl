@@ -147,8 +147,8 @@ function ptest()
  # c:4.25974 4.25974 4.25974
 
 	
-	i = 362
-	j = 642
+	i = 23
+	j = 780
 	wh = 800
 	r = shootRay(WORLD.cameras[1], (i-1) / wh , (j-1) / wh)
 	println(r)

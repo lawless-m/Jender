@@ -12,11 +12,11 @@ using Rays: Ray, pointAt
 using Cameras: Camera, shoot
 
 function renderPixel(i::Int, j::Int, w::Int, h::Int, numsamples::Int)
-	c = Float64[0,0,0] 
-	for s in 1:numsamples
-		c += Rays.color(shoot(WORLD.cameras[1], (i-1 + rand()) / w, (j-1 + rand()) / h), 0)
+	c = Matrix{Float64}(numsamples,3)
+	Threads.@threads for s in 1:numsamples
+		c[s,:] = Rays.color(shoot(WORLD.cameras[1], (i-1 + rand()) / w, (j-1 + rand()) / h), 0)
 	end
-	produce(c / numsamples)
+	produce([sum(c[:,1])/numsamples, sum(c[:,2])/numsamples, sum(c[:,3])/numsamples])
 end
 
 function render(w::Int, h::Int, numsamples::Int)
@@ -63,6 +63,7 @@ function profiled()
 	w, h = 100ASPECTW, 100ASPECTH
 	writepgm(Task(()->@profile render(w, h, 3)), w, h, "Profiled1")
 	Profile.print()
+	# 10.121293 seconds (469.18 M allocations: 17.560 GB, 8.33% gc time)
 end
 
 function small()
@@ -70,5 +71,5 @@ function small()
 	writepgm(Task(()->@time render(w, h, 1)), w, h, "Small1")
 end	
 
-best()
+@time profiled()
 
